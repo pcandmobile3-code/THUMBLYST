@@ -346,6 +346,23 @@ async function claimReward() {
 }
 
 function closeModal() { document.getElementById('rewardModal').classList.remove('active'); }
+// Add this right before the closing </script> tag
+window.addEventListener('DOMContentLoaded', () => {
+    const params = new URLSearchParams(window.location.search);
+    const code = params.get('code');
+
+    if (code) {
+        const input = document.getElementById('redeemCodeInput');
+        input.value = code.toUpperCase();
+        
+        // We wait 1 second to ensure Firebase is initialized 
+        // and the 't-fade' animations are starting
+        setTimeout(() => {
+            verifyCode();
+        }, 1000);
+    }
+});
+
 </script>
 </body>
 </html>
