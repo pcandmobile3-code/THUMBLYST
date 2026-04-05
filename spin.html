@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Daily Spin | Thumblyst</title>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+    <script src="config.js"></script>
+    <style id="shared"></style>
+    <style>
+        /* LIGHT THEME */
+        body { background: #fff!important; color: #0a0a0a!important; font-family: 'Inter', system-ui, -apple-system, sans-serif; margin: 0; }
+        .t-container { background: #fff!important; padding: 16px 16px 80px!important; max-width: 500px; margin: 0 auto; }
+        
+        /* HEADER & COINS */
+        .coins-bar { display: flex; align-items: center; justify-content: space-between; background: #0a0a0a; border-radius: 16px; padding: 16px 20px; margin: 16px 0; box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
+        .coins-bar .label { font-size: 10px; font-weight: 800; letter-spacing: 2px; color: rgba(255,255,255,0.45); text-transform: uppercase; }
+        .coins-bar .value { font-size: 24px; font-weight: 900; color: #fff; display: flex; align-items: center; gap: 8px; margin-top: 4px; }
+        .icon-coin { width: 24px; height: 24px; fill: #FFD700; }
+
+        /* SPIN WHEEL */
+        .wheel-wrap { display: flex; flex-direction: column; align-items: center; padding: 24px 0 12px; }
+        .wheel-container { position: relative; width: 320px; height: 320px; }
+        #wheelCanvas { width: 320px; height: 320px; border-radius: 50%; box-shadow: 0 0 0 6px #f0f0f0, 0 15px 40px rgba(0,0,0,0.12); }
+        .wheel-pointer { position: absolute; top: -12px; left: 50%; transform: translateX(-50%); width: 0; height: 0; border-left: 16px solid transparent; border-right: 16px solid transparent; border-top: 28px solid #0a0a0a; z-index: 10; filter: drop-shadow(0 4px 4px rgba(0,0,0,0.1)); }
+        .wheel-center { position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); width: 56px; height: 56px; border-radius: 50%; background: #fff; border: 2px solid #eee; display: flex; align-items: center; justify-content: center; z-index: 5; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+        .wheel-center svg { width: 28px; height: 28px; fill: #0a0a0a; }
+
+        .spin-btn { margin: 28px auto 0; display: block; width: 100%; max-width: 280px; padding: 18px; background: #0a0a0a; color: #fff; border: none; border-radius: 14px; font-size: 13px; font-weight: 900; letter-spacing: 3px; text-transform: uppercase; cursor: pointer; transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275); box-shadow: 0 8px 25px rgba(0,0,0,0.15); }
+        .spin-btn:active { transform: scale(0.96); opacity: 0.9; }
+        .spin-btn:disabled { opacity: 0.2; cursor: not-allowed; filter: grayscale(1); transform: scale(1); }
+
+        .countdown-wrap { text-align: center; margin-top: 16px; }
+        .countdown-label { font-size: 10px; font-weight: 800; letter-spacing: 2px; color: rgba(0,0,0,0.3); text-transform: uppercase; }
+        .countdown-timer { font-size: 24px; font-weight: 900; color: #0a0a0a; margin-top: 4px; letter-spacing: 3px; }
+
+        /* LISTS & CARDS */
+        .t-section-title { color: #0a0a0a; font-size: 11px; letter-spacing: 4px; font-weight: 900; text-transform: uppercase; margin: 36px 0 16px; display: flex; align-items: center; gap: 12px; }
+        .t-section-title::after { content: ''; flex: 1; height: 1px; background: rgba(0,0,0,0.08); }
+
+        .prize-list { background: #fafafa; border: 1px solid rgba(0,0,0,0.05); border-radius: 18px; overflow: hidden; margin: 24px 0; }
+        .prize-item { display: flex; align-items: center; gap: 14px; padding: 15px 20px; border-bottom: 1px solid rgba(0,0,0,0.04); }
+        .prize-item:last-child { border-bottom: none; }
+        .prize-icon-box { width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; }
+        .prize-icon-box svg { width: 100%; height: 100%; fill: #0a0a0a; }
+        .prize-name { flex: 1; font-size: 14px; font-weight: 600; color: #0a0a0a; }
+        .prize-chance { font-size: 9px; font-weight: 800; letter-spacing: 1px; color: rgba(0,0,0,0.4); text-transform: uppercase; background: #eee; border-radius: 6px; padding: 4px 8px; }
+        .prize-chance.hot { color: #f59e0b; background: #fffbeb; }
+        .prize-chance.rare { color: #8b5cf6; background: #f5f3ff; }
+
+        .store-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        .store-card { background: #fafafa; border: 1px solid rgba(0,0,0,0.05); border-radius: 18px; padding: 20px; display: flex; flex-direction: column; align-items: flex-start; gap: 10px; transition: transform 0.2s; cursor: pointer; }
+        .store-card:active { transform: scale(0.97); }
+        .store-icon { width: 32px; height: 32px; fill: #0a0a0a; }
+        .store-name { font-size: 13px; font-weight: 700; color: #0a0a0a; line-height: 1.4; }
+        .store-cost { font-size: 11px; font-weight: 800; color: rgba(0,0,0,0.4); letter-spacing: 1px; display: flex; align-items: center; gap: 4px; }
+        .store-btn { width: 100%; margin-top: 8px; padding: 10px; background: #0a0a0a; color: #fff; border: none; border-radius: 10px; font-size: 10px; font-weight: 800; letter-spacing: 2px; text-transform: uppercase; cursor: pointer; }
+
+        /* WIN OVERLAY */
+        .win-overlay { position: fixed; inset: 0; background: #fff; z-index: 2000; display: none; align-items: center; justify-content: center; flex-direction: column; padding: 40px; text-align: center; }
+        .win-overlay.active { display: flex; animation: fadeIn 0.3s ease; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        .win-icon-large { width: 100px; height: 100px; fill: #0a0a0a; animation: bounceIn 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        @keyframes bounceIn { 0% { transform: scale(0); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+        .win-label { font-size: 12px; font-weight: 900; letter-spacing: 5px; color: rgba(0,0,0,0.3); text-transform: uppercase; margin-top: 24px; }
+        .win-prize { font-size: 32px; font-weight: 900; color: #0a0a0a; margin-top: 8px; line-height: 1.1; }
+
+        .confetti-piece { position: fixed; width: 10px; height: 10px; border-radius: 2px; animation: confettiFall linear forwards; pointer-events: none; z-index: 2001; }
+        @keyframes confettiFall { 0% { transform: translateY(-20px) rotate(0deg); opacity: 1; } 100% { transform: translateY(110vh) rotate(720deg); opacity: 0; } }
+    </style>
+</head>
+<body>
+
+<div id="header"></div>
+
+<div class="t-container">
+    <div class="coins-bar">
+        <div>
+            <div class="label">Your Balance</div>
+            <div class="value" id="coinsDisplay">
+                <svg class="icon-coin" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1.45 12.1c-1.32.43-2.45.16-3.09-.48l-1.06 1.06c.99.99 2.56 1.34 4.15.82 1.59-.51 2.51-1.78 2.51-3.1 0-1.07-.63-1.89-1.86-2.28L12 9.5c-1-.31-1.42-.71-1.42-1.18 0-.58.55-1.03 1.45-1.03 1.1 0 1.88.39 2.45.96l1.06-1.06c-.84-.84-2.14-1.27-3.51-1.27-1.83 0-3.19 1.12-3.19 2.72 0 1.08.64 1.84 1.82 2.23l2.12.7c1.07.35 1.58.74 1.58 1.42.01.7-.56 1.11-1.46 1.11z"/></svg>
+                <span id="coinVal">0</span>
+            </div>
+        </div>
+        <svg style="width:32px; height:32px; opacity:0.1" viewBox="0 0 24 24"><path d="M11.5,2C6.81,2 3,5.81 3,10.5C3,14.09 5.23,17.16 8.36,18.42L7.61,21.5L10,21L11.5,22L13,21L15.39,21.5L14.64,18.42C17.77,17.16 20,14.09 20,10.5C20,5.81 16.19,2 11.5,2Z"/></svg>
+    </div>
+
+    <div class="wheel-wrap">
+        <div class="wheel-container">
+            <div class="wheel-pointer"></div>
+            <canvas id="wheelCanvas" width="640" height="640"></canvas>
+            <div class="wheel-center" id="centerIcon"></div>
+        </div>
+        <button class="spin-btn" id="spinBtn" onclick="doSpin()">▶ SPIN NOW</button>
+        <div class="countdown-wrap" id="countdownWrap" style="display:none">
+            <div class="countdown-label">Next spin available in</div>
+            <div class="countdown-timer" id="countdownTimer">00:00:00</div>
+        </div>
+    </div>
+
+    <div class="t-section-title">Today's Rewards</div>
+    <div class="prize-list" id="prizeList"></div>
+
+    <div class="t-section-title">Redeem Coins</div>
+    <div class="store-grid" id="storeGrid"></div>
+</div>
+
+<div class="win-overlay" id="winOverlay">
+    <div id="winIconContainer" class="win-icon-large"></div>
+    <div class="win-label">SUCCESSFULLY WON</div>
+    <div class="win-prize" id="winPrize"></div>
+    <button class="spin-btn" onclick="closeWin()" style="margin-top:40px; max-width:200px;">AWESOME</button>
+</div>
+
+<div id="footer"></div>
+
+<script>
+// --- SVG ASSET DICTIONARY ---
+const SVGS = {
+    coin: `<svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1.45 12.1c-1.32.43-2.45.16-3.09-.48l-1.06 1.06c.99.99 2.56 1.34 4.15.82 1.59-.51 2.51-1.78 2.51-3.1 0-1.07-.63-1.89-1.86-2.28L12 9.5c-1-.31-1.42-.71-1.42-1.18 0-.58.55-1.03 1.45-1.03 1.1 0 1.88.39 2.45.96l1.06-1.06c-.84-.84-2.14-1.27-3.51-1.27-1.83 0-3.19 1.12-3.19 2.72 0 1.08.64 1.84 1.82 2.23l2.12.7c1.07.35 1.58.74 1.58 1.42.01.7-.56 1.11-1.46 1.11z"/></svg>`,
+    gift: `<svg viewBox="0 0 24 24"><path d="M20,6H17.62A3,3,0,0,0,12,4.68,3,3,0,0,0,6.38,6H4A2,2,0,0,0,2,8V19a2,2,0,0,0,2,2H20a2,2,0,0,0,2-2V8A2,2,0,0,0,20,6ZM9,6a1,1,0,1,1,1,1A1,1,0,0,1,9,6ZM15,6a1,1,0,1,1,1,1A1,1,0,0,1,15,6ZM4,8H11v4H4Zm0,11V14H11v5Zm16,0H13V14h7Zm0-7H13V8h7Z"/></svg>`,
+    game: `<svg viewBox="0 0 24 24"><path d="M21,6H3A2,2,0,0,0,1,8V16a2,2,0,0,0,2,2H21a2,2,0,0,0,2-2V8A2,2,0,0,0,21,6ZM10,13H8v2H6V13H4V11H6V9H8v2h2Zm5.5,2A1.5,1.5,0,1,1,17,13.5,1.5,1.5,0,0,1,15.5,15Zm3-3A1.5,1.5,0,1,1,20,10.5,1.5,1.5,0,0,1,18.5,12Z"/></svg>`,
+    tag: `<svg viewBox="0 0 24 24"><path d="M21.41,11.58l-9-9C12.05,2.22,11.53,2,11,2H4C2.9,2,2,2.9,2,4v7c0,0.53,0.22,1.05,0.59,1.42l9,9 c0.36,0.36,0.86,0.58,1.41,0.58s1.05-0.22,1.41-0.59l7-7C21.78,13.64,22,13.11,22,12.58S21.78,11.94,21.41,11.58z M5.5,7 C4.67,7,4,6.33,4,5.5S4.67,4,5.5,4S7,4.67,7,5.5S6.33,7,5.5,7z"/></svg>`,
+    star: `<svg viewBox="0 0 24 24"><path d="M12,17.27L18.18,21L16.64,13.97L22,9.24L14.81,8.62L12,2L9.19,8.63L2,9.24L7.36,13.97L5.82,21L12,17.27Z"/></svg>`,
+    diamond: `<svg viewBox="0 0 24 24"><path d="M16.5,3L5,13.5L12,21L19,13.5L16.5,3ZM12,18.18L7,13.5L12,8.82L17,13.5L12,18.18Z"/></svg>`,
+    refresh: `<svg viewBox="0 0 24 24"><path d="M17.65,6.35C16.2,4.9,14.21,4,12,4A8,8,0,0,0,4,12A8,8,0,0,0,12,20C15.73,20,18.84,17.45,19.73,14H17.65C16.83,16.33,14.61,18,12,18A6,6,0,0,1,6,12A6,6,0,0,1,12,6C13.66,6,15.14,6.69,16.22,7.78L13,11H20V4L17.65,6.35Z"/></svg>`,
+    trophy: `<svg viewBox="0 0 24 24"><path d="M18,2H6V4H2V9A5,5,0,0,0,7,14,5,5,0,0,0,11,15.9V18H9v2H15V18H13V15.9A5,5,0,0,0,17,14,5,5,0,0,0,22,9V4H18ZM4,9V6H6V11.38A3,3,0,0,1,4,9Zm16,0a3,3,0,0,1-2,2.38V6h2Z"/></svg>`,
+    palette: `<svg viewBox="0 0 24 24"><path d="M12,2A10,10,0,0,0,2,12a10,10,0,0,0,10,10,1,1,0,0,0,1-1,1.1,1.1,0,0,0-.29-.71,1,1,0,0,1,0-1.41A1,1,0,0,1,14,18h2a5,5,0,0,0,5-5C21,7.58,16.97,4,12,2ZM6.5,13a1.5,1.5,0,1,1,1.5-1.5A1.5,1.5,0,0,1,6.5,13Zm3-3a1.5,1.5,0,1,1,1.5-1.5A1.5,1.5,0,0,1,9.5,10Zm5,0a1.5,1.5,0,1,1,1.5-1.5A1.5,1.5,0,0,1,14.5,10Zm3,3a1.5,1.5,0,1,1,1.5-1.5A1.5,1.5,0,0,1,17.5,13Z"/></svg>`
+};
+
+document.getElementById('centerIcon').innerHTML = SVGS.game;
+
+// Configuration
+const DEFAULT_ITEMS = [    
+  { svg:'coin', label:'50 Coins', type:'coins', value:50, chance:0.10, color:'#000' },    
+  { svg:'gift', label:'Free Thumb', type:'free_thumb', value:1, chance:0.005, color:'#111' },    
+  { svg:'game', label:'Play Store', type:'voucher', value:'GP100', chance:0.00, color:'#000' },    
+  { svg:'coin', label:'20 Coins', type:'coins', value:20, chance:0.18, color:'#111' },    
+  { svg:'tag', label:'5% OFF', type:'coupon', value:5, chance:0.08, color:'#000' },    
+  { svg:'coin', label:'10 Coins', type:'coins', value:10, chance:0.25, color:'#111' },    
+  { svg:'star', label:'10% OFF', type:'coupon', value:10, chance:0.05, color:'#000' },    
+  { svg:'diamond', label:'PFP Pack', type:'free_pack', value:'pfp', chance:0.02, color:'#111' },    
+  { svg:'refresh', label:'Try Again', type:'nothing', value:0, chance:0.30, color:'#000' },    
+  { svg:'coin', label:'100 Coins', type:'coins', value:100, chance:0.045, color:'#111' },    
+];
+
+const STORE_ITEMS = [    
+  { svg:'palette', name:'5% Discount', cost:100, type:'coupon', value:5 },    
+  { svg:'star', name:'10% Discount', cost:200, type:'coupon', value:10 },    
+  { svg:'gift', name:'Free Token', cost:500, type:'free_thumb', value:1 },    
+  { svg:'trophy', name:'GFX Master Pack', cost:800, type:'free_pack', value:'pack1' },    
+];
+
+// State & Firebase
+let USER = null, userCoins = 0, WHEEL_ITEMS = DEFAULT_ITEMS, spinning = false, currentAngle = 0;
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth(), db = firebase.firestore();
+
+auth.onAuthStateChanged(async u => {
+  if (!u) { await auth.signInAnonymously(); return; }
+  USER = u;
+  listenToBalance();
+  drawWheel();
+  buildLists();
+  checkAvailability();
+});
+
+function listenToBalance() {
+  db.collection('users').doc(USER.uid).onSnapshot(doc => {
+    userCoins = doc.exists ? (doc.data().coins || 0) : 0;
+    document.getElementById('coinVal').textContent = userCoins;
+  });
+}
+
+function drawWheel(rotationRad = 0) {
+  const canvas = document.getElementById('wheelCanvas');
+  const ctx = canvas.getContext('2d');
+  const W = 640, cx = W/2, cy = W/2, r = W/2 - 10;
+  const n = WHEEL_ITEMS.length, arc = (Math.PI * 2) / n;
+  
+  ctx.clearRect(0, 0, W, W);
+  ctx.save();
+  ctx.translate(cx, cy);
+  ctx.rotate(rotationRad);
+  ctx.translate(-cx, -cy);
+
+  WHEEL_ITEMS.forEach((item, i) => {
+    const start = arc * i - Math.PI/2, end = start + arc;
+    ctx.beginPath(); ctx.moveTo(cx, cy); ctx.arc(cx, cy, r, start, end); ctx.closePath();
+    ctx.fillStyle = item.color; ctx.fill();
+    ctx.strokeStyle = 'rgba(255,255,255,0.05)'; ctx.lineWidth = 1; ctx.stroke();
+    
+    ctx.save();
+    ctx.translate(cx, cy); ctx.rotate(start + arc/2);
+    ctx.textAlign = 'right'; ctx.fillStyle = '#fff';
+    ctx.font = '900 20px Inter';
+    ctx.fillText(item.label.toUpperCase(), r - 40, 8);
+    ctx.restore();
+  });
+  ctx.restore();
+}
+
+function weightedRandom() {
+  const total = WHEEL_ITEMS.reduce((s, i) => s + (i.chance || 0.1), 0);
+  let r = Math.random() * total, sum = 0;
+  for (let i = 0; i < WHEEL_ITEMS.length; i++) {
+    sum += (WHEEL_ITEMS[i].chance || 0.1);
+    if (r <= sum) return i;
+  }
+  return 0;
+}
+
+async function doSpin() {
+  if (spinning || !USER) return;
+  spinning = true;
+  document.getElementById('spinBtn').disabled = true;
+
+  const winIdx = weightedRandom();
+  const arc = 360 / WHEEL_ITEMS.length;
+  const targetRotation = 360 * 5 + (360 - winIdx * arc - arc/2);
+  const start = performance.now(), duration = 4000;
+
+  function animate(now) {
+    const elapsed = now - start;
+    const progress = Math.min(elapsed / duration, 1);
+    const ease = 1 - Math.pow(1 - progress, 4);
+    const rotation = (currentAngle + targetRotation * ease) * Math.PI / 180;
+    drawWheel(rotation);
+    if (progress < 1) requestAnimationFrame(animate);
+    else {
+        currentAngle = (currentAngle + targetRotation) % 360;
+        spinning = false;
+        handleWin(winIdx);
+    }
+  }
+  requestAnimationFrame(animate);
+}
+
+async function handleWin(idx) {
+  const prize = WHEEL_ITEMS[idx];
+  const isRare = prize.chance < 0.05;
+
+  await db.collection('users').doc(USER.uid).set({ lastSpin: firebase.firestore.FieldValue.serverTimestamp() }, { merge: true });
+
+  if (prize.type === 'coins') {
+    await db.collection('users').doc(USER.uid).update({ coins: firebase.firestore.FieldValue.increment(prize.value) });
+  } else if (prize.type === 'coupon') {
+    await db.collection('users').doc(USER.uid).collection('coupons').add({
+      code: 'SPIN' + prize.value + Math.random().toString(36).substr(2,4).toUpperCase(),
+      discount: prize.value, type: 'percent', validUntil: new Date(Date.now() + 604800000)
+    });
+  }
+
+  if (isRare) spawnConfetti();
+  document.getElementById('winIconContainer').innerHTML = SVGS[prize.svg];
+  document.getElementById('winPrize').textContent = prize.label;
+  document.getElementById('winOverlay').classList.add('active');
+  checkAvailability();
+}
+
+function buildLists() {
+  document.getElementById('prizeList').innerHTML = WHEEL_ITEMS.map(item => `
+    <div class="prize-item">
+        <div class="prize-icon-box">${SVGS[item.svg]}</div>
+        <span class="prize-name">${item.label}</span>
+        <span class="prize-chance ${item.chance < 0.05 ? 'rare' : ''}">${item.chance < 0.02 ? 'ULTRA' : item.chance < 0.1 ? 'RARE' : 'COMMON'}</span>
+    </div>`).join('');
+
+  document.getElementById('storeGrid').innerHTML = STORE_ITEMS.map((item, i) => `
+    <div class="store-card" onclick="redeemStore(${i})">
+        <div class="store-icon">${SVGS[item.svg]}</div>
+        <div class="store-name">${item.name}</div>
+        <div class="store-cost">⚡ ${item.cost}</div>
+        <button class="store-btn">REDEEM</button>
+    </div>`).join('');
+}
+
+async function checkAvailability() {
+  const doc = await db.collection('users').doc(USER.uid).get();
+  const last = doc.exists && doc.data().lastSpin ? doc.data().lastSpin.toDate() : null;
+  const now = new Date();
+  if (last && (now - last < 86400000)) {
+    const next = new Date(last.getTime() + 86400000);
+    document.getElementById('spinBtn').disabled = true;
+    document.getElementById('spinBtn').textContent = 'LOCKED';
+    document.getElementById('countdownWrap').style.display = 'block';
+    startCountdown(next);
+  }
+}
+
+function startCountdown(target) {
+  clearInterval(window._spinTimer);
+  window._spinTimer = setInterval(() => {
+    const diff = target - new Date();
+    if (diff <= 0) { clearInterval(window._spinTimer); location.reload(); }
+    const h = Math.floor(diff/3600000), m = Math.floor((diff%3600000)/60000), s = Math.floor((diff%60000)/1000);
+    document.getElementById('countdownTimer').textContent = `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+  }, 1000);
+}
+
+function spawnConfetti() {
+  for (let i = 0; i < 50; i++) {
+    const el = document.createElement('div');
+    el.className = 'confetti-piece';
+    el.style.left = Math.random() * 100 + 'vw';
+    el.style.background = ['#000', '#ffd700', '#eee'][Math.floor(Math.random()*3)];
+    el.style.animationDuration = (1 + Math.random() * 2) + 's';
+    document.body.appendChild(el);
+    setTimeout(() => el.remove(), 3000);
+  }
+}
+
+function closeWin() { document.getElementById('winOverlay').classList.remove('active'); }
+
+async function redeemStore(i) {
+  const item = STORE_ITEMS[i];
+  if (userCoins < item.cost) return alert('Not enough coins!');
+  if (!confirm(`Spend ${item.cost} coins?`)) return;
+  await db.collection('users').doc(USER.uid).update({ coins: firebase.firestore.FieldValue.increment(-item.cost) });
+  alert('Redeemed successfully!');
+}
+</script>
+
+</body>
+</html>

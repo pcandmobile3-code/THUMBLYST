@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Checkout | Thumblyst</title>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<script src="config.js"></script>
+<style id="shared"></style>
+<style>
+/* ─── BASE THEME ─── */
+:root {
+  --shim-a: #f0f0f0;
+  --shim-b: #e0e0e0;
+  --accent: #0a0a0a;
+}
+
+body {
+  background: #fff !important;
+  color: #0a0a0a !important;
+  font-family: 'Inter', sans-serif;
+}
+
+@keyframes pageFade { from { opacity: 0; transform: translateY(10px) } to { opacity: 1; transform: translateY(0) } }
+.t-container { 
+    background: #fff !important; 
+    padding: 16px 16px 100px !important; 
+    animation: pageFade 0.45s cubic-bezier(0.22, 1, 0.36, 1) both; 
+}
+
+/* ─── HEADER ─── */
+.back-header {
+  height: 60px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 0 16px;
+  border-bottom: 1px solid rgba(0,0,0,0.07);
+  background: rgba(255,255,255,0.95);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  backdrop-filter: blur(10px);
+}
+
+.back-header h2 {
+  font-size: 14px;
+  font-weight: 900;
+  color: #0a0a0a;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  flex: 1;
+}
+
+.back-btn {
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  background: none;
+  color: #0a0a0a;
+  cursor: pointer;
+}
+
+/* ─── ORDER SUMMARY ─── */
+.pay-summary {
+  background: #fff;
+  border: 1px solid rgba(0,0,0,0.06);
+  border-radius: 16px;
+  overflow: hidden;
+  margin-bottom: 24px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.04);
+}
+
+.pay-item {
+  display: flex;
+  gap: 14px;
+  align-items: center;
+  padding: 14px;
+  border-bottom: 1px solid rgba(0,0,0,0.04);
+}
+
+.pay-item:last-child { border-bottom: none; }
+
+.pay-item img {
+  width: 50px;
+  height: 50px;
+  border-radius: 10px;
+  object-fit: cover;
+  background: #f5f5f5;
+  border: 1px solid rgba(0,0,0,0.05);
+}
+
+.pay-item-info h4 {
+  font-size: 13px;
+  font-weight: 800;
+  color: #0a0a0a;
+  letter-spacing: 0.5px;
+}
+
+.pay-item-info p {
+  font-size: 12px;
+  font-weight: 600;
+  color: rgba(0,0,0,0.4);
+  margin-top: 2px;
+}
+
+/* ─── PRICING BOX ─── */
+.pay-total-box {
+  background: #fafafa;
+  border: 1px solid rgba(0,0,0,0.06);
+  border-radius: 14px;
+  padding: 18px;
+  margin-bottom: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.pay-total-box .lbl {
+  font-size: 9px;
+  font-weight: 900;
+  letter-spacing: 2px;
+  color: rgba(0,0,0,0.3);
+  text-transform: uppercase;
+}
+
+.pay-total-box .amt {
+  font-size: 24px;
+  font-weight: 900;
+  color: #0a0a0a;
+}
+
+.original-price {
+  font-size: 14px;
+  color: rgba(0,0,0,0.2);
+  text-decoration: line-through;
+  margin-right: 6px;
+  font-weight: 700;
+}
+
+/* ─── COUPON SYSTEM ─── */
+.my-coupons-lbl {
+  font-size: 9px;
+  font-weight: 900;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: rgba(0,0,0,0.4);
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.my-coupons-lbl::after { content:''; flex:1; height:1px; background: rgba(0,0,0,0.05); }
+
+.my-coupon-pill {
+  display: inline-block;
+  margin: 0 6px 6px 0;
+  padding: 7px 12px;
+  background: #f8f8f8;
+  border: 1px solid rgba(0,0,0,0.06);
+  border-radius: 8px;
+  font-size: 11px;
+  font-weight: 800;
+  color: #0a0a0a;
+  font-family: monospace;
+  cursor: pointer;
+}
+
+.coupon-row { display: flex; gap: 10px; margin-bottom: 8px; }
+
+.coupon-input {
+  flex: 1;
+  padding: 14px;
+  background: #fff;
+  border: 1.5px solid rgba(0,0,0,0.08);
+  border-radius: 12px;
+  color: #0a0a0a;
+  font-size: 14px;
+  font-weight: 800;
+  font-family: monospace;
+  text-transform: uppercase;
+}
+
+.coupon-input:focus { border-color: #0a0a0a; outline: none; }
+
+.apply-btn {
+  padding: 0 20px;
+  background: #0a0a0a;
+  color: #fff;
+  border: none;
+  border-radius: 12px;
+  font-size: 10px;
+  font-weight: 900;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+/* ─── BUTTONS ─── */
+.btn-stack { display: flex; flex-direction: column; gap: 12px; }
+
+.gbtn {
+  padding: 16px;
+  border: none;
+  border-radius: 14px;
+  font-size: 12px;
+  font-weight: 900;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: transform 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+
+.gbtn:active { transform: scale(0.97); }
+
+.gbtn-p { background: #0a0a0a; color: #fff; }
+.gbtn-o { background: transparent; color: #0a0a0a; border: 1.5px solid rgba(0,0,0,0.1); }
+
+/* ─── MODALS ─── */
+.t-modal-box {
+  background: #fff !important;
+  border: none !important;
+  border-radius: 24px !important;
+  padding: 30px !important;
+  box-shadow: 0 10px 40px rgba(0,0,0,0.15) !important;
+}
+
+.t-modal-box h3 {
+  color: #0a0a0a !important;
+  font-size: 16px !important;
+  font-weight: 900 !important;
+  letter-spacing: 2px !important;
+  text-transform: uppercase;
+}
+
+/* ─── SUCCESS SCREEN ─── */
+.success-screen { text-align: center; display: none; padding-top: 60px; }
+.success-screen.active { display: block; }
+.suc-icon-wrap { 
+    width: 80px; 
+    height: 80px; 
+    background: #f0f0f0; 
+    border-radius: 50%; 
+    display: flex; 
+    align-items: center; 
+    justify-content: center; 
+    margin: 0 auto 24px;
+}
+.suc-title { font-size: 22px; font-weight: 900; letter-spacing: 2px; color: #0a0a0a; }
+.suc-sub { font-size: 13px; color: rgba(0,0,0,0.4); margin-top: 10px; line-height: 1.6;}
+
+.reward-box {
+  background: #fcfcfc;
+  border: 1.5px dashed rgba(0,0,0,0.1);
+  border-radius: 16px;
+  padding: 20px;
+  margin-top: 30px;
+}
+.reward-box .rc { font-size: 24px; font-weight: 900; color: #0a0a0a; letter-spacing: 5px; margin: 10px 0; }
+</style>
+</head>
+<body>
+
+<div class="back-header">
+  <button class="back-btn" onclick="history.back()" id="backBtn"></button>
+  <h2>Checkout</h2>
+</div>
+
+<div class="t-container" id="mainView">
+  <div class="pay-summary" id="summary">
+    <div style="padding:40px; text-align:center;">
+        <div class="t-spinner" style="margin:auto; border-top-color:#0a0a0a"></div>
+    </div>
+  </div>
+
+  <div class="my-coupons-lbl">Available Offers</div>
+  <div id="myCoupons" style="margin-bottom:14px"></div>
+
+  <div class="coupon-row">
+    <input class="coupon-input" id="couponInput" placeholder="PROMO CODE" maxlength="24" oninput="this.value=this.value.toUpperCase()">
+    <button class="apply-btn" id="applyBtn" onclick="applyCoupon()">Apply</button>
+  </div>
+  <div id="couponMsg" style="font-size:11px; font-weight:700; margin: 8px 0 20px;"></div>
+
+  <div class="pay-total-box">
+    <div>
+      <div class="lbl">Order Total</div>
+      <div>
+        <span class="original-price" id="origAmt" style="display:none"></span>
+        <span class="amt">₹<span id="total">0</span></span>
+      </div>
+    </div>
+    <div style="opacity:0.15">
+        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+    </div>
+  </div>
+
+  <div class="btn-stack">
+    <button class="gbtn gbtn-o" onclick="openQR()">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><line x1="7" y1="7" x2="7" y2="7"/><line x1="17" y1="7" x2="17" y2="7"/><line x1="17" y1="17" x2="17" y2="17"/><line x1="7" y1="17" x2="7" y2="17"/></svg>
+        View Payment QR
+    </button>
+    <button class="gbtn gbtn-o" onclick="enterRef()">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+        Submit Ref ID
+    </button>
+    <button class="gbtn gbtn-p" id="placeBtn" onclick="placeOrder()">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+        Place Order Now
+    </button>
+  </div>
+</div>
+
+<div class="t-container success-screen" id="successView">
+  <div class="suc-icon-wrap">
+    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#0a0a0a" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+  </div>
+  <div class="suc-title">Success!</div>
+  <div class="suc-sub">Payment pending verification.<br>We will process your GFX shortly.</div>
+  
+  <div class="reward-box" id="rewardBox" style="display:none">
+    <div style="font-size:9px; font-weight:900; letter-spacing:2px; color:rgba(0,0,0,0.3)">UNLOCKED REWARD</div>
+    <div class="rc" id="rewardCode">WELCOME30</div>
+    <div id="rewardDesc" style="font-size:11px; font-weight:700; color:rgba(0,0,0,0.4)">30% off your next order</div>
+  </div>
+
+  <button class="gbtn gbtn-p" style="width:100%; margin-top:40px" onclick="location.href='orders.html'">
+    Go to My Orders
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+  </button>
+</div>
+
+<div class="t-modal" id="qrModal">
+  <div class="t-modal-box">
+    <h3>Scan &amp; Pay</h3>
+    <div style="text-align:center; padding:20px 0;">
+        <img id="qrImg" style="width:100%; max-width:220px; border-radius:12px; border: 1px solid #f0f0f0;">
+    </div>
+    <p style="font-size:11px; color:rgba(0,0,0,0.4); text-align:center; margin-bottom:20px;">After payment, please submit the Reference ID.</p>
+    <button class="gbtn gbtn-p" style="width:100%" onclick="document.getElementById('qrModal').classList.remove('active')">I have paid</button>
+  </div>
+</div>
+
+<div class="t-modal" id="refModal">
+  <div class="t-modal-box">
+    <h3>Transaction ID</h3>
+    <input class="coupon-input" id="upiRef" placeholder="12-digit Ref Number" style="margin:20px 0; width:100%;">
+    <button class="gbtn gbtn-p" style="width:100%" onclick="saveRef()">Confirm Ref ID</button>
+  </div>
+</div>
+
+<script>
+document.getElementById('shared').textContent = SHARED_CSS;
+document.getElementById('backBtn').innerHTML = ICONS.back;
+firebase.initializeApp(firebaseConfig);
+const auth=firebase.auth(), db=firebase.firestore();
+let cartItems=[],rawTotal=0,finalTotal=0,paymentRef='',appliedCoupon=null,currentUser=null;
+
+auth.onAuthStateChanged(async u=>{
+  if(!u) u=(await auth.signInAnonymously()).user;
+  currentUser=u; fetchCart(u.uid); loadMyCoupons(u.uid);
+});
+
+async function fetchCart(uid){
+  const snap=await db.collection('users').doc(uid).collection('cart').get();
+  const summary=document.getElementById('summary');
+  summary.innerHTML=''; cartItems=[]; rawTotal=0;
+  if(snap.empty){summary.innerHTML='<div style="padding:40px;color:rgba(0,0,0,0.2);text-align:center;font-size:11px;font-weight:800;letter-spacing:2px">EMPTY CART</div>';return;}
+  snap.forEach(doc=>{
+    const d=doc.data(),price=Number(d.Price||d.price||0);
+    rawTotal+=price; cartItems.push({...d,id:doc.id});
+    summary.innerHTML+=`<div class="pay-item"><img src="${d.Thumbnail||d.imageUrl||d.image||''}" onerror="this.src='https://via.placeholder.com/50'"><div class="pay-item-info"><h4>${d.Title||d.title||'Item'}</h4><p>₹${price}</p></div></div>`;
+  });
+  finalTotal=rawTotal; document.getElementById('total').textContent=finalTotal;
+}
+
+async function loadMyCoupons(uid){
+  const c=document.getElementById('myCoupons');
+  try{
+    const snap=await db.collection('users').doc(uid).collection('coupons').get();
+    const now=new Date(), valid=snap.docs.filter(d=>{
+      const e=d.data().validUntil; if(!e)return true;
+      return new Date(e.toDate?e.toDate():e)>now;
+    });
+    if(!valid.length){c.style.display='none';document.querySelector('.my-coupons-lbl').style.display='none';return;}
+    c.innerHTML=valid.map(d=>`<span class="my-coupon-pill" onclick="useThisCoupon('${d.data().code}')">${d.data().code} (-${d.data().discount}%)</span>`).join('');
+  }catch(_){c.style.display='none';}
+}
+
+function useThisCoupon(code){document.getElementById('couponInput').value=code;applyCoupon();}
+
+async function applyCoupon(){
+  const code=document.getElementById('couponInput').value.trim().toUpperCase();
+  if(!code)return;
+  const msg=document.getElementById('couponMsg');
+  document.getElementById('applyBtn').disabled=true;
+  try{
+    const globalDoc=await db.collection('coupons').doc(code).get();
+    if(globalDoc.exists){
+      const c=globalDoc.data(),now=new Date();
+      const exp=c.validUntil?new Date(c.validUntil.toDate?c.validUntil.toDate():c.validUntil):null;
+      if(exp&&exp<now){msg.textContent='Code expired'; msg.style.color='#f87171'; document.getElementById('applyBtn').disabled=false;return;}
+      applyDiscount(c,code);
+      msg.textContent=`Applied: ${c.discount}% Discount`; msg.style.color='#16a34a';
+      document.getElementById('applyBtn').disabled=false;return;
+    }
+    msg.textContent='Invalid code'; msg.style.color='#f87171';
+  }catch(e){msg.textContent='Error';}
+  document.getElementById('applyBtn').disabled=false;
+}
+
+function applyDiscount(coupon,code){
+  appliedCoupon={code,...coupon};
+  const disc=coupon.discount||0;
+  finalTotal=Math.round(rawTotal*(1-disc/100));
+  document.getElementById('total').textContent=finalTotal;
+  document.getElementById('origAmt').textContent='₹'+rawTotal;
+  document.getElementById('origAmt').style.display='inline';
+}
+
+function openQR(){
+  const upi=`upi://pay?pa=9920128302@ptyes&pn=Thumblyst&am=${finalTotal}&cu=INR`;
+  document.getElementById('qrImg').src='https://api.qrserver.com/v1/create-qr-code/?size=300x300&data='+encodeURIComponent(upi);
+  document.getElementById('qrModal').classList.add('active');
+}
+function enterRef(){document.getElementById('refModal').classList.add('active');}
+function saveRef(){
+  const v=document.getElementById('upiRef').value.trim();
+  if(!v)return;
+  paymentRef=v;
+  document.getElementById('refModal').classList.remove('active');
+  document.getElementById('placeBtn').textContent='Confirm Order (Ref ID Locked)';
+}
+
+async function placeOrder(){
+  if(!cartItems.length){alert('Empty Cart');return;}
+  if(!paymentRef){alert('Please submit Ref ID first');return;}
+  const btn=document.getElementById('placeBtn');
+  btn.disabled=true; btn.textContent='Processing...';
+  try{
+    const orderRef=await db.collection('users').doc(currentUser.uid).collection('orders').add({
+      paymentRef,total:finalTotal,rawTotal,
+      createdAt:firebase.firestore.FieldValue.serverTimestamp(),
+      status:'Verifying'
+    });
+    for(const item of cartItems){
+      await orderRef.collection('items').add(item);
+      await db.collection('users').doc(currentUser.uid).collection('cart').doc(item.id).delete();
+    }
+    document.getElementById('mainView').style.display='none';
+    document.getElementById('successView').classList.add('active');
+  }catch(err){alert(err.message);btn.disabled=false;}
+}
+</script>
+</body>
+</html>

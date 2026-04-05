@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Contact | Thumblyst</title>
+<script src="config.js"></script>
+<style id="shared"></style>
+<style>
+.contact-wrap { max-width: 480px; margin: 0 auto; padding: 24px 20px 64px; animation: pageIn 0.45s ease both; }
+.contact-card {
+  background: #fff;
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius);
+  padding: 20px;
+  margin-bottom: 12px;
+  box-shadow: var(--shadow-sm);
+  transition: var(--transition);
+}
+.contact-card:active { transform: scale(0.98); }
+.contact-card-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+  font-family: var(--font-display);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+.contact-card-icon {
+  width: 32px;
+  height: 32px;
+  background: var(--bg-secondary);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.contact-card p, .contact-card a:not(.wa-btn) {
+  font-size: 14px;
+  color: var(--text);
+  font-weight: 500;
+  text-decoration: none;
+  line-height: 1.5;
+}
+.wa-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 14px;
+  padding: 13px 16px;
+  background: #f0fdf4;
+  border: 1.5px solid #bbf7d0;
+  border-radius: var(--radius-sm);
+  text-decoration: none;
+  color: #15803d;
+  font-family: var(--font-display);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  transition: var(--transition);
+}
+.wa-btn:active { background: #dcfce7; transform: scale(0.97); }
+</style>
+</head>
+<body>
+<div class="back-header">
+  <button class="back-btn" id="backBtn" onclick="history.back()"></button>
+  <h2>Contact</h2>
+</div>
+
+<div class="contact-wrap">
+  <div class="contact-card t-fade">
+    <div class="contact-card-head">
+      <div class="contact-card-icon" id="ic1"></div> Thumblyst
+    </div>
+    <p>High-quality YouTube &amp; gaming thumbnails with fast delivery and affordable pricing.</p>
+  </div>
+
+  <div class="contact-card t-fade">
+    <div class="contact-card-head">
+      <div class="contact-card-icon" id="ic2"></div> WhatsApp
+    </div>
+    <p>+91 88289 49250</p>
+    <a class="wa-btn" href="https://wa.me/918828949250" target="_blank">
+      <span id="ic2b"></span> Chat on WhatsApp
+    </a>
+  </div>
+
+  <div class="contact-card t-fade">
+    <div class="contact-card-head">
+      <div class="contact-card-icon" id="ic3"></div> Email
+    </div>
+    <p>thumblyst999@gmail.com</p>
+  </div>
+
+  <div class="contact-card t-fade">
+    <div class="contact-card-head">
+      <div class="contact-card-icon" id="ic4"></div> Instagram
+    </div>
+    <a href="https://www.instagram.com/thumblyst" target="_blank">@thumblyst</a>
+  </div>
+</div>
+
+<script>
+document.getElementById('shared').textContent = SHARED_CSS;
+document.getElementById('backBtn').innerHTML = ICONS.back;
+document.getElementById('ic1').innerHTML = ICONS.shield;
+document.getElementById('ic2').innerHTML = ICONS.phone;
+document.getElementById('ic2b').innerHTML = ICONS.whatsapp;
+document.getElementById('ic3').innerHTML = ICONS.mail;
+document.getElementById('ic4').innerHTML = ICONS.instagram;
+document.querySelectorAll('.t-fade').forEach(el =>
+  new IntersectionObserver(([e]) => { if (e.isIntersecting) el.classList.add('visible'); }, {threshold:0.08}).observe(el));
+</script>
+</body>
+</html>

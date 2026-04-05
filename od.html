@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Order Details | Thumblyst</title>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<script src="config.js"></script>
+<style id="shared"></style>
+<style>
+.od-card {
+  background: var(--bg);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-lg);
+  overflow: hidden;
+}
+.od-card img {
+  width: 100%;
+  max-height: 200px;
+  object-fit: contain;
+  background: var(--bg-secondary);
+}
+.od-info { padding: 20px; display: flex; flex-direction: column; gap: 8px; }
+.od-info h3 { font-size: 18px; font-weight: 700; }
+.od-info p { font-size: 14px; }
+.od-info small { font-size: 12px; color: var(--text-secondary); }
+.progress-wrap { margin: 12px 0; }
+.progress-bar {
+  height: 8px;
+  background: var(--border);
+  border-radius: 4px;
+  overflow: hidden;
+}
+.progress-fill {
+  height: 100%;
+  background: var(--accent);
+  transition: width 0.4s;
+}
+.progress-labels {
+  display: flex;
+  justify-content: space-between;
+  font-size: 10px;
+  color: var(--text-secondary);
+  margin-top: 6px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.back-header {
+  height: 60px; display: flex; align-items: center; gap: 12px;
+  padding: 0 16px; border-bottom: 1px solid var(--border); background: var(--bg);
+  position: sticky; top: 0; z-index: 100;
+}
+.back-header h2 { font-size: 18px; font-weight: 700; flex: 1; }
+.back-btn { width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; border: none; background: none; color: var(--text); }
+</style>
+<style>
+body{background:#fff!important;color:#0a0a0a!important;}
+.t-header{background:rgba(255,255,255,0.95)!important;border-bottom-color:rgba(0,0,0,0.07)!important;}
+.t-logo{color:#0a0a0a!important;}.t-header-btn{color:#0a0a0a!important;}
+.t-sidebar{background:#fff!important;border-right-color:rgba(0,0,0,0.07)!important;}
+.t-sidebar-header{border-bottom-color:rgba(0,0,0,0.06)!important;color:#0a0a0a!important;}
+.t-sidebar-nav a{color:rgba(0,0,0,0.65)!important;border-bottom-color:rgba(0,0,0,0.05)!important;}
+.t-overlay{background:rgba(0,0,0,0.45)!important;}
+.t-container{background:#fff!important;padding-bottom:80px!important;}
+.t-card{background:#fff!important;border-color:rgba(0,0,0,0.07)!important;}
+.t-input{background:#f8f8f8!important;border-color:rgba(0,0,0,0.1)!important;color:#0a0a0a!important;}
+.t-input::placeholder{color:rgba(0,0,0,0.3)!important;}
+.t-btn-primary{background:#0a0a0a!important;color:#fff!important;font-weight:900!important;}
+.t-btn-outline{border-color:rgba(0,0,0,0.15)!important;color:#0a0a0a!important;background:transparent!important;}
+.t-section-title{color:#0a0a0a!important;font-size:10px!important;letter-spacing:3px!important;font-weight:900!important;text-transform:uppercase!important;}
+.t-footer{background:#0a0a0a!important;border-top-color:rgba(0,0,0,0.1)!important;color:rgba(255,255,255,0.4)!important;}
+.t-footer a{color:rgba(255,255,255,0.4)!important;}
+.t-spinner{border-color:rgba(0,0,0,0.08)!important;border-top-color:#0a0a0a!important;}
+.t-empty{color:rgba(0,0,0,0.3)!important;}
+.back-header{background:rgba(255,255,255,0.95)!important;border-bottom-color:rgba(0,0,0,0.07)!important;}
+.back-header h2,.back-header h3{color:#0a0a0a!important;}
+.back-btn{color:#0a0a0a!important;}
+.t-modal-box{background:#fff!important;border:1px solid rgba(0,0,0,0.08)!important;box-shadow:0 8px 40px rgba(0,0,0,0.12)!important;}
+.t-modal-box h3,.t-modal-box h2{color:#0a0a0a!important;}
+h1,h2,h3{color:#0a0a0a;}
+</style>
+</head>
+<body>
+
+<div class="back-header">
+  <button class="back-btn" onclick="history.back()"><span id="backIcon"></span></button>
+  <h2>Order Details</h2>
+</div>
+
+<div class="t-container" style="padding-top:16px" id="box">
+  <div class="t-loader"><div class="t-spinner"></div></div>
+</div>
+
+<script>
+document.getElementById('shared').textContent = SHARED_CSS;
+document.getElementById('backIcon').innerHTML = ICONS.back;
+
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db = firebase.firestore();
+
+const box = document.getElementById('box');
+const oid = new URLSearchParams(location.search).get('oid');
+const itemId = new URLSearchParams(location.search).get('item');
+
+auth.onAuthStateChanged(async user => {
+  if (!user || !oid || !itemId) { location.href = 'orders.html'; return; }
+
+  const orderRef = db.collection('users').doc(user.uid).collection('orders').doc(oid);
+  const itemRef = orderRef.collection('items').doc(itemId);
+
+  const [itemSnap, orderSnap] = await Promise.all([itemRef.get(), orderRef.get()]);
+
+  if (!itemSnap.exists || !orderSnap.exists) { box.innerHTML = '<div class="t-empty">Order not found</div>'; return; }
+
+  const item = itemSnap.data();
+  const o = orderSnap.data();
+  const price = Number(item.Price || item.price || 0);
+  const img = item.Thumbnail || item.imageUrl || item.image || '';
+  const status = o.status || 'Payment Verification';
+
+  let percent = 25;
+  if (status === 'Creating') percent = 50;
+  else if (status === 'Processing') percent = 75;
+  else if (status === 'Processed') percent = 100;
+
+  function getStatusClass(s) {
+    if (s === 'Creating') return 't-status-creating';
+    if (s === 'Processing') return 't-status-processing';
+    if (s === 'Processed') return 't-status-processed';
+    return 't-status-verifying';
+  }
+
+  box.innerHTML = `
+    <div class="od-card">
+      <img src="${img}">
+      <div class="od-info">
+        <h3>${item.Title || item.title || 'Item'}</h3>
+        <p>Amount: ₹${price}</p>
+        ${item.CustomText ? `<small>Text: ${item.CustomText}</small>` : ''}
+        ${item.WhatsApp ? `<small>WhatsApp: ${item.WhatsApp}</small>` : ''}
+        <p>UPI Ref: ${o.paymentRef || '-'}</p>
+        <div class="progress-wrap">
+          <div class="progress-bar"><div class="progress-fill" style="width:${percent}%"></div></div>
+          <div class="progress-labels">
+            <span>Verify</span><span>Create</span><span>Process</span><span>Done</span>
+          </div>
+        </div>
+        <span class="t-status ${getStatusClass(status)}">${status}</span>
+        <button class="t-btn t-btn-danger" style="margin-top:16px" onclick="cancelOrder()">Cancel Order</button>
+      </div>
+    </div>`;
+
+  window.cancelOrder = async () => {
+    if (!confirm('Cancel this order?')) return;
+    await orderRef.delete();
+    alert('Order cancelled');
+    location.href = 'orders.html';
+  };
+});
+</script>
+</body>
+</html>

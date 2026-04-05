@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Redeem | Thumblyst</title>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<script src="config.js"></script>
+<style id="shared"></style>
+<style>
+/* Base Styles */
+body {
+    background: #fff!important;
+    color: #0a0a0a!important;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    margin: 0;
+    overflow-x: hidden;
+}
+
+/* Centralizing Wrapper */
+.t-viewport-center {
+    min-height: 85vh; /* Accounts for header/footer space */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+
+.t-container {
+    background: #fff!important;
+    width: 100%;
+    max-width: 420px; /* Slimmer for better focus */
+    margin: 0 auto;
+}
+
+/* Sidebar & Header Overrides */
+.t-header { background: rgba(255,255,255,0.95)!important; border-bottom: 1px solid rgba(0,0,0,0.05)!important; }
+.t-logo, .t-header-btn { color: #0a0a0a!important; }
+
+/* Hero Section - Centralized */
+.redeem-hero {
+    text-align: center;
+    margin-bottom: 32px;
+}
+.hero-svg-wrap {
+    background: #0a0a0a;
+    width: 72px;
+    height: 72px;
+    border-radius: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 20px;
+    box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+}
+.hero-svg { width: 32px; height: 32px; fill: #fff; }
+.redeem-hero h2 { 
+    font-size: 22px; 
+    font-weight: 900; 
+    letter-spacing: -0.5px; 
+    margin: 0 0 8px; 
+}
+.redeem-hero p { 
+    font-size: 14px; 
+    color: rgba(0,0,0,0.4); 
+    margin: 0; 
+}
+
+/* Premium Card */
+.redeem-card {
+    background: #fff;
+    border: 1px solid rgba(0,0,0,0.06);
+    border-radius: 28px;
+    padding: 24px;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.04);
+}
+
+.code-input-wrap {
+    display: flex;
+    flex-direction: column; /* Stacked for better mobile centralization */
+    gap: 12px;
+}
+
+.code-input {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 18px;
+    background: #f9f9f9;
+    border: 2px solid transparent;
+    border-radius: 18px;
+    font-size: 18px;
+    font-weight: 800;
+    letter-spacing: 4px;
+    font-family: monospace;
+    text-transform: uppercase;
+    text-align: center;
+    transition: all 0.2s ease;
+}
+.code-input:focus {
+    border-color: #0a0a0a;
+    background: #fff;
+    outline: none;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+}
+
+.verify-btn {
+    width: 100%;
+    padding: 18px;
+    background: #0a0a0a;
+    color: #fff;
+    border: none;
+    border-radius: 18px;
+    font-size: 14px;
+    font-weight: 900;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: transform 0.2s active;
+}
+.verify-btn:active { transform: scale(0.98); }
+
+/* Status Messages */
+.status-msg {
+    margin-top: 16px;
+    font-size: 13px;
+    font-weight: 600;
+    display: none;
+    padding: 14px;
+    border-radius: 14px;
+    text-align: center;
+    justify-content: center;
+}
+.status-msg.show { display: flex; align-items: center; gap: 8px; }
+.status-msg.error { background: #fff1f2; color: #e11d48; }
+.status-msg.success { background: #f0fdf4; color: #16a34a; }
+
+/* Claim Reveal Area */
+.claim-section {
+    display: none;
+    margin-top: 20px;
+    padding-top: 20px;
+    border-top: 1px solid #f0f0f0;
+}
+.claim-section.show { display: block; animation: slideUp 0.4s ease forwards; }
+
+.claim-preview {
+    background: #f9f9f9;
+    border-radius: 20px;
+    padding: 20px;
+    margin-bottom: 16px;
+    text-align: center;
+}
+.cp-label { font-size: 10px; font-weight: 800; color: rgba(0,0,0,0.3); text-transform: uppercase; margin-bottom: 4px; }
+.cp-title { font-size: 18px; font-weight: 900; color: #0a0a0a; }
+
+.claim-btn {
+    width: 100%;
+    padding: 18px;
+    background: #16a34a; /* Green for claim */
+    color: #fff;
+    border: none;
+    border-radius: 18px;
+    font-size: 14px;
+    font-weight: 900;
+    text-transform: uppercase;
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+}
+
+/* Animations */
+@keyframes slideUp {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.t-fade { opacity: 0; transform: translateY(15px); transition: 0.6s cubic-bezier(0.2, 1, 0.3, 1); }
+.t-fade.visible { opacity: 1; transform: translateY(0); }
+
+/* Modal Overrides */
+.t-modal-box { border-radius: 32px!important; padding: 40px 24px!important; }
+</style>
+</head>
+<body>
+
+<div id="header"></div>
+
+<div class="t-viewport-center">
+    <div class="t-container">
+        <div class="redeem-hero t-fade">
+            <div class="hero-svg-wrap">
+                <svg class="hero-svg" viewBox="0 0 24 24"><path d="M20 6h-2.18c.11-.31.18-.65.18-1a2.5 2.5 0 0 0-5-0c0 .35.07.69.18 1H11a2.5 2.5 0 0 0-5-0c0 .35.07.69.18 1H4c-1.11 0-1.99.89-1.99 2L2 19c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V8c0-1.11-.89-2-2-2m-5-3.5a1.5 1.5 0 0 1 0 3c-.41 0-.75-.33-.75-.75V4.11c0-.34.23-.61.75-.61m-6 3a1.5 1.5 0 0 1 0-3c.52 0 .75.27.75.61v.64c0 .42-.34.75-.75.75M9 19H4v-2h5v2m0-5H4v-2h5v2m11 5h-9v-7h9v7m0-9h-9v-2h9v2z"/></svg>
+            </div>
+            <h2>Redeem Reward</h2>
+            <p>Enter your code to unlock content</p>
+        </div>
+
+        <div class="redeem-card t-fade">
+            <div class="code-input-wrap">
+                <input class="code-input" id="redeemCodeInput" placeholder="••••••" maxlength="32" oninput="this.value=this.value.toUpperCase();clearMsg()">
+                <button class="verify-btn" id="verifyBtn" onclick="verifyCode()">Verify Code</button>
+            </div>
+            
+            <div class="status-msg" id="statusMsg"></div>
+
+            <div class="claim-section" id="claimSection">
+                <div class="claim-preview">
+                    <div class="cp-label">Coupon Found</div>
+                    <div class="cp-title" id="rewardTitle">—</div>
+                    <div id="rewardSub" style="display:none"></div>
+                </div>
+                <button class="claim-btn" id="claimBtn" onclick="claimReward()">
+                    Claim This Reward
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="t-modal" id="rewardModal">
+  <div class="t-modal-box">
+    <div style="background:#f0fdf4; width:80px; height:80px; border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto 20px;">
+        <svg style="width:40px; height:40px; fill:#16a34a" viewBox="0 0 24 24"><path d="M12 2L4.5 20.29l.71.71L12 18l6.79 3 .71-.71L12 2z"/></svg>
+    </div>
+    <h3 style="font-size:24px; margin-bottom:10px;">Success!</h3>
+    <p style="margin-bottom:32px; color:rgba(0,0,0,0.5); font-size:15px; line-height:1.6;">Your reward has been successfully added to your account.</p>
+    <a id="rewardLink" target="_blank" style="display:block; padding:18px; background:#0a0a0a; color:#fff; text-decoration:none; border-radius:18px; font-size:14px; font-weight:900; text-transform:uppercase;">Access Content</a>
+    <button style="margin-top:20px; background:none; border:none; color:rgba(0,0,0,0.3); font-weight:700; cursor:pointer;" onclick="closeModal()">Close</button>
+  </div>
+</div>
+
+<div id="footer"></div>
+
+<script>
+document.getElementById('shared').textContent = SHARED_CSS;
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db = firebase.firestore();
+
+document.getElementById('header').innerHTML = headerHTML('REDEEM');
+document.getElementById('footer').innerHTML = footerHTML();
+
+// Sidebar Init
+const initSidebar = () => {
+    const overlay = document.getElementById('overlay');
+    const sidebar = document.getElementById('sidebar');
+    window.toggleSidebar = () => {
+        sidebar.classList.toggle('active');
+        overlay.classList.toggle('active');
+    };
+    if(overlay) overlay.addEventListener('click', toggleSidebar);
+};
+initSidebar();
+
+let USER = null, CURRENT_COUPON = null;
+
+auth.onAuthStateChanged(u => {
+    USER = u;
+    if (!u) auth.signInAnonymously();
+    if (u && document.getElementById('cartBadge')) {
+        db.collection('users').doc(u.uid).collection('cart').onSnapshot(snap => {
+            document.getElementById('cartBadge').textContent = snap.size;
+            document.getElementById('cartBadge').style.display = snap.size > 0 ? 'flex' : 'none';
+        });
+    }
+});
+
+const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => { if (entry.isIntersecting) entry.target.classList.add('visible'); });
+}, { threshold: 0.1 });
+document.querySelectorAll('.t-fade').forEach(el => observer.observe(el));
+
+function clearMsg() {
+    const msg = document.getElementById('statusMsg');
+    msg.className = 'status-msg';
+    msg.innerHTML = '';
+    document.getElementById('claimSection').classList.remove('show');
+}
+
+function showMsg(text, type) {
+    const msg = document.getElementById('statusMsg');
+    msg.innerHTML = `<span>${text}</span>`;
+    msg.className = 'status-msg show ' + type;
+}
+
+async function verifyCode() {
+    const code = document.getElementById('redeemCodeInput').value.trim().toUpperCase();
+    if (!code) { showMsg('Please enter a code', 'error'); return; }
+
+    const btn = document.getElementById('verifyBtn');
+    btn.disabled = true; btn.textContent = 'Verifying...';
+
+    try {
+        const q = await db.collection('coupons').doc(code).get();
+        if (!q.exists) {
+            showMsg('Invalid or inactive code', 'error');
+        } else {
+            const data = q.data();
+            if (data.validUntil && data.validUntil.toDate() < new Date()) {
+                showMsg('This coupon has expired', 'error');
+            } else if (data.usedCount >= data.maxUses) {
+                showMsg('Usage limit reached', 'error');
+            } else if (USER && data.usedBy && data.usedBy.includes(USER.uid)) {
+                showMsg('Already claimed by you', 'error');
+            } else {
+                CURRENT_COUPON = { id: q.id, ...data };
+                document.getElementById('rewardTitle').textContent = data.code;
+                document.getElementById('claimSection').classList.add('show');
+                showMsg('Code verified!', 'success');
+            }
+        }
+    } catch(e) { showMsg('Error checking code', 'error'); }
+    btn.disabled = false; btn.textContent = 'Verify Code';
+}
+
+async function claimReward() {
+    if (!USER || USER.isAnonymous) {
+        showMsg('Please sign in first', 'error');
+        setTimeout(() => location.href = 'login.html', 1500);
+        return;
+    }
+    const btn = document.getElementById('claimBtn');
+    btn.disabled = true; btn.textContent = 'Claiming...';
+    try {
+        const batch = db.batch();
+        batch.update(db.collection('coupons').doc(CURRENT_COUPON.id), {
+            usedCount: firebase.firestore.FieldValue.increment(1),
+            usedBy: firebase.firestore.FieldValue.arrayUnion(USER.uid)
+        });
+        batch.set(db.collection('users').doc(USER.uid), {
+            redeems: firebase.firestore.FieldValue.arrayUnion({
+                code: CURRENT_COUPON.code,
+                date: new Date().toISOString()
+            })
+        }, { merge: true });
+        await batch.commit();
+        document.getElementById('rewardLink').href = CURRENT_COUPON.link || '#';
+        document.getElementById('rewardModal').classList.add('active');
+        document.getElementById('claimSection').classList.remove('show');
+    } catch(e) { alert('Claim failed'); }
+    btn.disabled = false; btn.textContent = 'Claim This Reward';
+}
+
+function closeModal() { document.getElementById('rewardModal').classList.remove('active'); }
+</script>
+</body>
+</html>

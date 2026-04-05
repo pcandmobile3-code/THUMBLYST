@@ -1,0 +1,546 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Admin | Thumblyst</title>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<script src="config.js"></script>
+<style id="shared"></style>
+<style>
+.admin-header {
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 20px;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+.admin-header h1 {
+  font-size: 18px;
+  font-weight: 800;
+  letter-spacing: 2px;
+}
+.admin-container {
+  max-width: 560px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+/* TABS */
+.admin-tabs {
+  display: flex;
+  gap: 0;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 20px;
+}
+.admin-tab {
+  flex: 1;
+  padding: 12px;
+  text-align: center;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  cursor: pointer;
+  border: none;
+  background: none;
+  color: var(--text-secondary);
+  border-bottom: 2px solid transparent;
+  transition: var(--transition);
+  font-family: inherit;
+}
+.admin-tab.active {
+  color: var(--text);
+  border-bottom-color: var(--accent);
+}
+
+/* UPLOAD FORM */
+.upload-section { display: none; }
+.upload-section.active { display: block; }
+
+.upload-dropzone {
+  width: 100%;
+  height: 200px;
+  border: 2px dashed var(--border);
+  border-radius: var(--radius);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: var(--transition);
+  gap: 8px;
+  color: var(--text-secondary);
+  font-size: 13px;
+  font-weight: 500;
+}
+.upload-dropzone:active {
+  border-color: var(--accent);
+}
+.upload-dropzone.has-image {
+  border-style: solid;
+  padding: 8px;
+}
+.upload-dropzone img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  border-radius: var(--radius-sm);
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+/* PRODUCT LIST */
+.product-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.product-row {
+  display: flex;
+  gap: 12px;
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  align-items: center;
+}
+.product-row img {
+  width: 70px;
+  height: 50px;
+  object-fit: cover;
+  border-radius: 6px;
+}
+.product-row-info {
+  flex: 1;
+}
+.product-row-info h4 {
+  font-size: 14px;
+  font-weight: 600;
+}
+.product-row-info small {
+  font-size: 11px;
+  color: var(--text-secondary);
+}
+.product-row-actions {
+  display: flex;
+  gap: 6px;
+}
+.product-row-actions button {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--border);
+  background: none;
+  border-radius: 6px;
+  color: var(--text);
+  transition: var(--transition);
+}
+.product-row-actions button.del {
+  color: var(--danger);
+  border-color: var(--danger);
+}
+
+/* ORDERS MANAGEMENT */
+.order-manage-card {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 14px;
+  margin-bottom: 12px;
+}
+.order-manage-card h4 {
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+.order-manage-card p,
+.order-manage-card small {
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+.status-select {
+  padding: 8px 12px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font-size: 13px;
+  font-family: inherit;
+  background: var(--bg);
+  margin-top: 8px;
+}
+
+/* TOAST */
+.toast {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%) translateY(100px);
+  background: var(--accent);
+  color: #fff;
+  padding: 12px 24px;
+  border-radius: 30px;
+  font-size: 14px;
+  font-weight: 600;
+  z-index: 9999;
+  transition: transform 0.3s ease;
+  white-space: nowrap;
+}
+.toast.show {
+  transform: translateX(-50%) translateY(0);
+}
+
+/* PROGRESS */
+.upload-progress {
+  width: 100%;
+  height: 4px;
+  background: var(--border);
+  border-radius: 2px;
+  margin-top: 12px;
+  overflow: hidden;
+  display: none;
+}
+.upload-progress.active { display: block; }
+.upload-progress-bar {
+  height: 100%;
+  background: var(--accent);
+  width: 0%;
+  transition: width 0.3s;
+}
+
+/* FEATURED TOGGLE */
+.toggle-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 16px;
+}
+.toggle {
+  width: 44px;
+  height: 24px;
+  background: var(--border);
+  border-radius: 12px;
+  position: relative;
+  cursor: pointer;
+  transition: var(--transition);
+}
+.toggle.on { background: var(--accent); }
+.toggle::after {
+  content: '';
+  width: 20px;
+  height: 20px;
+  background: #fff;
+  border-radius: 50%;
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  transition: var(--transition);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+}
+.toggle.on::after { left: 22px; }
+.toggle-label {
+  font-size: 13px;
+  font-weight: 500;
+}
+</style>
+<style>
+body{background:#fff!important;color:#0a0a0a!important;}
+.t-header{background:rgba(255,255,255,0.95)!important;border-bottom-color:rgba(0,0,0,0.07)!important;}
+.t-logo{color:#0a0a0a!important;}.t-header-btn{color:#0a0a0a!important;}
+.t-sidebar{background:#fff!important;border-right-color:rgba(0,0,0,0.07)!important;}
+.t-sidebar-header{border-bottom-color:rgba(0,0,0,0.06)!important;color:#0a0a0a!important;}
+.t-sidebar-nav a{color:rgba(0,0,0,0.65)!important;border-bottom-color:rgba(0,0,0,0.05)!important;}
+.t-overlay{background:rgba(0,0,0,0.45)!important;}
+.t-container{background:#fff!important;padding-bottom:80px!important;}
+.t-card{background:#fff!important;border-color:rgba(0,0,0,0.07)!important;}
+.t-input{background:#f8f8f8!important;border-color:rgba(0,0,0,0.1)!important;color:#0a0a0a!important;}
+.t-input::placeholder{color:rgba(0,0,0,0.3)!important;}
+.t-btn-primary{background:#0a0a0a!important;color:#fff!important;font-weight:900!important;}
+.t-btn-outline{border-color:rgba(0,0,0,0.15)!important;color:#0a0a0a!important;background:transparent!important;}
+.t-section-title{color:#0a0a0a!important;font-size:10px!important;letter-spacing:3px!important;font-weight:900!important;text-transform:uppercase!important;}
+.t-footer{background:#0a0a0a!important;border-top-color:rgba(0,0,0,0.1)!important;color:rgba(255,255,255,0.4)!important;}
+.t-footer a{color:rgba(255,255,255,0.4)!important;}
+.t-spinner{border-color:rgba(0,0,0,0.08)!important;border-top-color:#0a0a0a!important;}
+.t-empty{color:rgba(0,0,0,0.3)!important;}
+.back-header{background:rgba(255,255,255,0.95)!important;border-bottom-color:rgba(0,0,0,0.07)!important;}
+.back-header h2,.back-header h3{color:#0a0a0a!important;}
+.back-btn{color:#0a0a0a!important;}
+.t-modal-box{background:#fff!important;border:1px solid rgba(0,0,0,0.08)!important;box-shadow:0 8px 40px rgba(0,0,0,0.12)!important;}
+.t-modal-box h3,.t-modal-box h2{color:#0a0a0a!important;}
+h1,h2,h3{color:#0a0a0a;}
+</style>
+</head>
+<body>
+
+<div class="admin-header">
+  <h1>ADMIN</h1>
+  <button class="t-header-btn" onclick="location.href='index.html'" id="homeBtn"></button>
+</div>
+
+<div class="admin-container">
+
+  <div class="admin-tabs">
+    <button class="admin-tab active" onclick="switchTab('upload')">Upload</button>
+    <button class="admin-tab" onclick="switchTab('products')">Products</button>
+    <button class="admin-tab" onclick="switchTab('orders')">Orders</button>
+  </div>
+
+  <!-- UPLOAD TAB -->
+  <div class="upload-section active" id="tab-upload">
+    <div class="upload-dropzone" id="dropzone" onclick="document.getElementById('fileInput').click()">
+      <span id="uploadSvg"></span>
+      <span>Tap to select image</span>
+    </div>
+    <input type="file" id="fileInput" accept="image/*" hidden>
+    <div class="upload-progress" id="progress">
+      <div class="upload-progress-bar" id="progressBar"></div>
+    </div>
+
+    <label class="t-label">Title</label>
+    <input class="t-input" id="title" placeholder="e.g. FFHQ001">
+
+    <div class="form-row">
+      <div>
+        <label class="t-label">Price (INR)</label>
+        <input class="t-input" id="price" type="number" placeholder="199">
+      </div>
+      <div>
+        <label class="t-label">Category</label>
+        <select class="t-input" id="category">
+          <option value="ff">Free Fire</option>
+          <option value="bgmi">BGMI</option>
+          <option value="valo">Valorant</option>
+          <option value="explore">Explore</option>
+          <option value="overlay">Overlay</option>
+          <option value="backgrounds">Backgrounds</option>
+          <option value="pfp">PFP</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="toggle-wrapper">
+      <div class="toggle" id="featuredToggle" onclick="this.classList.toggle('on')"></div>
+      <span class="toggle-label">Featured on homepage</span>
+    </div>
+
+    <button class="t-btn t-btn-primary" style="margin-top:20px" id="uploadBtn" onclick="uploadProduct()">Upload Product</button>
+  </div>
+
+  <!-- PRODUCTS TAB -->
+  <div class="upload-section" id="tab-products">
+    <div class="product-list" id="productList">
+      <div class="t-loader"><div class="t-spinner"></div></div>
+    </div>
+  </div>
+
+  <!-- ORDERS TAB -->
+  <div class="upload-section" id="tab-orders">
+    <div id="ordersList">
+      <div class="t-loader"><div class="t-spinner"></div></div>
+    </div>
+  </div>
+
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+document.getElementById('shared').textContent = SHARED_CSS;
+document.getElementById('uploadSvg').innerHTML = ICONS.upload;
+document.getElementById('homeBtn').innerHTML = ICONS.back;
+
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db = firebase.firestore();
+
+let selectedFile = null;
+
+// ─── AUTH CHECK ───
+auth.onAuthStateChanged(user => {
+  if (!user) {
+    auth.signInWithPopup(new firebase.auth.GoogleAuthProvider());
+  }
+});
+
+// ─── TAB SWITCHING ───
+function switchTab(tab) {
+  document.querySelectorAll('.upload-section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.admin-tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('tab-' + tab).classList.add('active');
+  event.target.classList.add('active');
+
+  if (tab === 'products') loadProducts();
+  if (tab === 'orders') loadAllOrders();
+}
+
+// ─── FILE INPUT ───
+const dropzone = document.getElementById('dropzone');
+const fileInput = document.getElementById('fileInput');
+
+fileInput.onchange = e => {
+  selectedFile = e.target.files[0];
+  if (!selectedFile) return;
+  dropzone.innerHTML = `<img src="${URL.createObjectURL(selectedFile)}">`;
+  dropzone.classList.add('has-image');
+};
+
+// ─── UPLOAD PRODUCT ───
+async function uploadProduct() {
+  if (!selectedFile) return showToast('Select an image first');
+
+  const title = document.getElementById('title').value.trim();
+  const price = document.getElementById('price').value.trim();
+  const category = document.getElementById('category').value;
+  const featured = document.getElementById('featuredToggle').classList.contains('on');
+
+  if (!title || !price) return showToast('Fill in title and price');
+
+  const btn = document.getElementById('uploadBtn');
+  btn.disabled = true;
+  btn.textContent = 'Uploading...';
+
+  const progress = document.getElementById('progress');
+  const progressBar = document.getElementById('progressBar');
+  progress.classList.add('active');
+  progressBar.style.width = '30%';
+
+  try {
+    // Upload to ImgBB
+    const imageUrl = await uploadToImgBB(selectedFile);
+    progressBar.style.width = '70%';
+
+    // Save to Firestore
+    await db.collection('products').add({
+      title,
+      price: Number(price),
+      category,
+      imageUrl,
+      featured,
+      createdAt: firebase.firestore.FieldValue.serverTimestamp()
+    });
+
+    progressBar.style.width = '100%';
+    showToast('Product uploaded successfully');
+
+    // Reset form
+    setTimeout(() => {
+      selectedFile = null;
+      dropzone.innerHTML = `${ICONS.upload}<span>Tap to select image</span>`;
+      dropzone.classList.remove('has-image');
+      document.getElementById('title').value = '';
+      document.getElementById('price').value = '';
+      document.getElementById('featuredToggle').classList.remove('on');
+      progress.classList.remove('active');
+      progressBar.style.width = '0%';
+      btn.disabled = false;
+      btn.textContent = 'Upload Product';
+    }, 800);
+
+  } catch(e) {
+    console.error(e);
+    showToast('Upload failed: ' + e);
+    btn.disabled = false;
+    btn.textContent = 'Upload Product';
+    progress.classList.remove('active');
+  }
+}
+
+// ─── LOAD PRODUCTS ───
+async function loadProducts() {
+  const list = document.getElementById('productList');
+  list.innerHTML = '<div class="t-loader"><div class="t-spinner"></div></div>';
+
+  const snap = await db.collection('products').orderBy('createdAt', 'desc').get();
+
+  if (snap.empty) { list.innerHTML = '<div class="t-empty">No products</div>'; return; }
+
+  list.innerHTML = '';
+  snap.forEach(doc => {
+    const d = doc.data();
+    list.innerHTML += `
+      <div class="product-row" id="prod-${doc.id}">
+        <img src="${d.imageUrl}" alt="${d.title}">
+        <div class="product-row-info">
+          <h4>${d.title}</h4>
+          <small>₹${d.price} &bull; ${d.category}${d.featured ? ' &bull; Featured' : ''}</small>
+        </div>
+        <div class="product-row-actions">
+          <button class="del" onclick="deleteProduct('${doc.id}')">${ICONS.trash}</button>
+        </div>
+      </div>`;
+  });
+}
+
+async function deleteProduct(id) {
+  if (!confirm('Delete this product?')) return;
+  await db.collection('products').doc(id).delete();
+  const el = document.getElementById('prod-' + id);
+  if (el) el.remove();
+  showToast('Product deleted');
+}
+
+// ─── LOAD ALL ORDERS ───
+async function loadAllOrders() {
+  const container = document.getElementById('ordersList');
+  container.innerHTML = '<div class="t-loader"><div class="t-spinner"></div></div>';
+
+  // We need to query across all users - this requires a collectionGroup query
+  // For simplicity, we'll iterate users who have orders
+  const usersSnap = await db.collection('users').get();
+  container.innerHTML = '';
+  let found = false;
+
+  for (const userDoc of usersSnap.docs) {
+    const ordersSnap = await userDoc.ref.collection('orders').orderBy('createdAt', 'desc').get();
+
+    for (const orderDoc of ordersSnap.docs) {
+      found = true;
+      const o = orderDoc.data();
+      const itemsSnap = await orderDoc.ref.collection('items').get();
+      let itemNames = [];
+      itemsSnap.forEach(i => itemNames.push(i.data().Title || i.data().title || 'Item'));
+
+      container.innerHTML += `
+        <div class="order-manage-card" id="order-${orderDoc.id}">
+          <h4>Order: ${orderDoc.id.substring(0, 8)}...</h4>
+          <p>Items: ${itemNames.join(', ')}</p>
+          <p>Total: ₹${o.total || 0} | Ref: ${o.paymentRef || '-'}</p>
+          <small>User: ${userDoc.id.substring(0, 8)}...</small>
+          <br>
+          <select class="status-select" onchange="updateStatus('${userDoc.id}','${orderDoc.id}',this.value)">
+            <option value="Payment Verification" ${o.status === 'Payment Verification' ? 'selected' : ''}>Payment Verification</option>
+            <option value="Creating" ${o.status === 'Creating' ? 'selected' : ''}>Creating</option>
+            <option value="Processing" ${o.status === 'Processing' ? 'selected' : ''}>Processing</option>
+            <option value="Processed" ${o.status === 'Processed' ? 'selected' : ''}>Processed</option>
+          </select>
+        </div>`;
+    }
+  }
+
+  if (!found) container.innerHTML = '<div class="t-empty">No orders</div>';
+}
+
+async function updateStatus(uid, oid, status) {
+  await db.collection('users').doc(uid).collection('orders').doc(oid).update({ status });
+  showToast('Status updated to: ' + status);
+}
+
+// ─── TOAST ───
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+</script>
+</body>
+</html>

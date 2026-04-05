@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cart | Thumblyst</title>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<script src="config.js"></script>
+<style id="shared"></style>
+<style>
+.cart-item {
+  display: flex;
+  gap: 13px;
+  padding: 14px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  margin-bottom: 12px;
+  align-items: center;
+  background: #fff;
+  box-shadow: var(--shadow-sm);
+  animation: pageIn 0.4s ease both;
+}
+.cart-thumb {
+  width: 80px;
+  height: 60px;
+  border-radius: var(--radius-sm);
+  object-fit: cover;
+  background: var(--bg-secondary);
+  flex-shrink: 0;
+}
+.cart-info { flex: 1; min-width: 0; }
+.cart-info h4 {
+  font-family: var(--font-display);
+  font-size: 13px;
+  font-weight: 700;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-bottom: 4px;
+  color: var(--text);
+}
+.cart-price {
+  font-family: var(--font-display);
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text);
+}
+.cart-meta { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+.cart-remove {
+  width: 34px;
+  height: 34px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  background: #fff1f2;
+  color: var(--danger);
+  border-radius: 50%;
+  flex-shrink: 0;
+  transition: var(--transition);
+}
+.cart-remove:active { transform: scale(0.88); }
+.cart-total-box {
+  background: var(--bg-secondary);
+  border-radius: var(--radius);
+  padding: 18px;
+  margin: 20px 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border: 1px solid var(--border);
+}
+.cart-total-label {
+  font-family: var(--font-display);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: 4px;
+}
+.cart-total-amt {
+  font-family: var(--font-display);
+  font-size: 24px;
+  font-weight: 800;
+  color: var(--text);
+}
+</style>
+</head>
+<body>
+<div class="back-header">
+  <button class="back-btn" id="backBtn" onclick="history.back()"></button>
+  <h2>My Cart</h2>
+</div>
+
+<div class="t-container" style="padding-top:16px">
+  <div id="cartBox"><div class="t-loader"><div class="t-spinner"></div></div></div>
+  <div class="cart-total-box">
+    <div>
+      <div class="cart-total-label">Order Total</div>
+      <div class="cart-total-amt">&#8377;<span id="total">0</span></div>
+    </div>
+    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="rgba(0,0,0,0.12)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+  </div>
+  <button class="t-btn t-btn-primary" onclick="location.href='payment.html'">Proceed to Checkout</button>
+</div>
+
+<script>
+document.getElementById('shared').textContent = SHARED_CSS;
+document.getElementById('backBtn').innerHTML = ICONS.back;
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth(), db = firebase.firestore();
+const cartBox = document.getElementById('cartBox'), totalEl = document.getElementById('total');
+
+auth.onAuthStateChanged(async user => {
+  if (!user) user = (await auth.signInAnonymously()).user;
+  loadCart(user.uid);
+});
+
+async function loadCart(uid) {
+  const snap = await db.collection('users').doc(uid).collection('cart').get();
+  cartBox.innerHTML = '';
+  let total = 0;
+  if (snap.empty) { cartBox.innerHTML = '<div class="t-empty">Your cart is empty</div>'; totalEl.textContent = '0'; return; }
+  snap.forEach(doc => {
+    const d = doc.data(), docId = doc.id, price = Number(d.Price||d.price||0);
+    total += price;
+    const imgSrc = d.Thumbnail||d.imageUrl||d.image||'';
+    cartBox.innerHTML += `
+      <div class="cart-item" id="cart-${docId}">
+        <img class="cart-thumb" src="${imgSrc}" alt="${d.Title||'Item'}" onerror="this.style.background='var(--bg-secondary)'">
+        <div class="cart-info">
+          <h4>${d.Title||d.title||'Untitled'}</h4>
+          <div class="cart-price">&#8377;${price}</div>
+          ${d.CustomText ? `<div class="cart-meta">Text: ${d.CustomText}</div>` : ''}
+          ${d.WhatsApp ? `<div class="cart-meta">WA: ${d.WhatsApp}</div>` : ''}
+        </div>
+        <button class="cart-remove" onclick="removeItem('${uid}','${docId}',${price})">${ICONS.trash}</button>
+      </div>`;
+  });
+  totalEl.textContent = total;
+}
+
+async function removeItem(uid, docId, price) {
+  if (!confirm('Remove this item?')) return;
+  await db.collection('users').doc(uid).collection('cart').doc(docId).delete();
+  const el = document.getElementById('cart-'+docId);
+  if (el) { el.style.opacity = '0'; el.style.transform = 'translateX(20px)'; el.style.transition = '0.3s ease'; setTimeout(() => el.remove(), 300); }
+  totalEl.textContent = Number(totalEl.textContent) - price;
+  if (!cartBox.querySelector('.cart-item')) cartBox.innerHTML = '<div class="t-empty">Your cart is empty</div>';
+}
+</script>
+</body>
+</html>
