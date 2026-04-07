@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Thumblyst – Premium Gaming Graphics. Custom thumbnails, overlays, PFPs, banners & backgrounds for gamers and streamers.">
 <title>Thumblyst – Premium Gaming Graphics</title>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
@@ -12,463 +13,247 @@
 <style>
 /* ── HERO ── */
 .hero {
-  position: relative;
-  width: 100%;
-  aspect-ratio: 16/9;
-  max-height: 260px;
-  background: #111;
-  overflow: hidden;
+  position:relative; width:100%; aspect-ratio:16/9; max-height:260px;
+  background:var(--bg3); overflow:hidden;
 }
 .hero-img {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  opacity: 0;
-  transition: opacity 0.7s ease;
-  z-index: 2;
+  position:absolute; inset:0; width:100%; height:100%;
+  object-fit:cover; opacity:0; transition:opacity 0.7s ease; z-index:2;
 }
-.hero-img.on { opacity: 1; }
-.hero-shim {
-  position: absolute;
-  inset: 0;
-  z-index: 1;
-  background: linear-gradient(90deg,#1a1a1a 0%,#1a1a1a 25%,#2a2a2a 50%,#1a1a1a 75%,#1a1a1a 100%);
-  background-size: 400% 100%;
-  animation: shimmerSweep 1.8s ease-in-out infinite;
-  transition: opacity 0.4s;
-}
-.hero-shim.off { opacity: 0; }
+.hero-img.on { opacity:1; }
+.hero-shim { position:absolute; inset:0; z-index:1; }
 .hero-overlay {
-  position: absolute;
-  inset: 0;
-  z-index: 4;
-  background: linear-gradient(160deg, transparent 10%, rgba(0,0,0,0.6) 80%);
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-end;
-  padding: 20px 18px 22px;
+  position:absolute; inset:0; z-index:4;
+  background:linear-gradient(160deg, transparent 10%, rgba(0,0,0,0.7) 80%);
+  display:flex; flex-direction:column; justify-content:flex-end;
+  padding:20px 18px 22px;
 }
 .hero-title {
-  font-family: var(--font-display);
-  color: #fff;
-  font-size: 27px;
-  font-weight: 800;
-  letter-spacing: 4px;
-  text-transform: uppercase;
-  text-shadow: 0 2px 24px rgba(0,0,0,0.5);
-  animation: fadeUp 0.8s cubic-bezier(0.22,1,0.36,1) 0.1s both;
+  font-family:var(--font-display); color:#fff;
+  font-size:26px; font-weight:900; letter-spacing:4px; text-transform:uppercase;
+  text-shadow:0 0 20px rgba(0,240,255,0.5), 0 2px 24px rgba(0,0,0,0.5);
+  animation:fadeUp 0.8s cubic-bezier(0.22,1,0.36,1) 0.1s both;
 }
 .hero-sub {
-  color: rgba(255,255,255,0.55);
-  font-size: 10px;
-  font-family: var(--font-display);
-  margin-top: 5px;
-  letter-spacing: 3px;
-  text-transform: uppercase;
-  animation: fadeUp 0.8s cubic-bezier(0.22,1,0.36,1) 0.22s both;
+  color:rgba(255,255,255,0.5); font-size:10px; font-family:var(--font-display);
+  margin-top:5px; letter-spacing:3px; text-transform:uppercase;
+  animation:fadeUp 0.8s cubic-bezier(0.22,1,0.36,1) 0.22s both;
 }
 .hero-pill {
-  position: absolute;
-  top: 14px;
-  right: 14px;
-  z-index: 5;
-  background: rgba(255,255,255,0.14);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(255,255,255,0.2);
-  border-radius: 20px;
-  padding: 5px 12px;
-  font-family: var(--font-display);
-  font-size: 9px;
-  font-weight: 700;
-  letter-spacing: 2px;
-  color: rgba(255,255,255,0.9);
-  text-transform: uppercase;
-  animation: fadeUp 0.6s ease 0.05s both;
+  position:absolute; top:14px; right:14px; z-index:5;
+  background:rgba(0,240,255,0.12); backdrop-filter:blur(12px);
+  border:1px solid rgba(0,240,255,0.25); border-radius:20px;
+  padding:5px 12px; font-family:var(--font-display);
+  font-size:8px; font-weight:800; letter-spacing:3px; color:var(--cyan);
+  text-transform:uppercase; animation:fadeUp 0.6s ease 0.05s both;
+  text-shadow:0 0 10px rgba(0,240,255,0.5);
 }
 
 /* ── SPIN BANNER ── */
 .spin-banner {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  background: #fff;
-  border: 1.5px solid var(--border);
-  border-radius: var(--radius);
-  padding: 15px 16px;
-  margin-bottom: 2px;
-  cursor: pointer;
-  text-decoration: none;
-  box-shadow: var(--shadow-sm);
-  transition: transform 0.25s var(--transition-spring), box-shadow 0.2s ease;
+  display:flex; align-items:center; gap:14px;
+  background:var(--bg2); border:1px solid var(--border);
+  border-radius:var(--radius); padding:15px 16px; margin-bottom:2px;
+  cursor:pointer; text-decoration:none; transition:var(--spring);
+  animation:borderGlow 3s ease-in-out infinite;
 }
-.spin-banner:active { transform: scale(0.97); box-shadow: none; }
+.spin-banner:active { transform:scale(0.97); }
 .spin-icon-ring {
-  width: 42px;
-  height: 42px;
-  border-radius: 50%;
-  background: var(--bg-secondary);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-  animation: spinSlow 6s linear infinite;
+  width:44px; height:44px; border-radius:50%;
+  background:linear-gradient(135deg,var(--cyan),var(--purple));
+  display:flex; align-items:center; justify-content:center; flex-shrink:0;
+  animation:spin 4s linear infinite; box-shadow:0 0 14px rgba(0,240,255,0.4);
 }
-@keyframes spinSlow { to { transform: rotate(360deg); } }
 .spin-info h3 {
-  font-family: var(--font-display);
-  font-size: 13px;
-  font-weight: 700;
-  color: var(--text);
-  letter-spacing: 1.5px;
-  text-transform: uppercase;
+  font-family:var(--font-display); font-size:13px; font-weight:800;
+  color:var(--text); letter-spacing:2px; text-transform:uppercase;
 }
-.spin-info p {
-  font-size: 11px;
-  color: var(--text-secondary);
-  margin-top: 3px;
-}
+.spin-info p { font-size:12px; color:var(--text2); margin-top:3px; font-weight:500; }
 .spin-live-dot {
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  background: var(--text);
-  margin-left: auto;
-  flex-shrink: 0;
-  animation: livePulse 1.6s ease-in-out infinite;
-}
-@keyframes livePulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.2;transform:scale(1.6)} }
-
-/* ── SEC BADGE ── */
-.sec-badge {
-  font-family: var(--font-display);
-  font-size: 8px;
-  font-weight: 700;
-  letter-spacing: 1.5px;
-  background: var(--bg-secondary);
-  border: 1px solid var(--border);
-  border-radius: 4px;
-  padding: 2px 7px;
-  text-transform: uppercase;
-  color: var(--text-muted);
+  width:7px; height:7px; border-radius:50%; background:var(--cyan);
+  margin-left:auto; flex-shrink:0; animation:livePulse 1.6s ease-in-out infinite;
+  box-shadow:0 0 8px rgba(0,240,255,0.6);
 }
 
 /* ── CATEGORY TRACK ── */
 .cat-track {
-  display: flex;
-  gap: 12px;
-  overflow-x: auto;
-  scroll-snap-type: x mandatory;
-  padding-bottom: 6px;
-  -webkit-overflow-scrolling: touch;
+  display:flex; gap:12px; overflow-x:auto; scroll-snap-type:x mandatory;
+  padding-bottom:6px; -webkit-overflow-scrolling:touch;
 }
 .cat-slide {
-  flex-shrink: 0;
-  width: 142px;
-  scroll-snap-align: start;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  text-decoration: none;
-  color: var(--text);
+  flex-shrink:0; width:136px; scroll-snap-align:start;
+  display:flex; flex-direction:column; gap:7px;
+  text-decoration:none; color:var(--text);
 }
 .cat-img-box {
-  width: 142px;
-  height: 188px;
-  border-radius: var(--radius);
-  overflow: hidden;
-  position: relative;
-  border: 1px solid var(--border);
-  box-shadow: var(--shadow);
-  transition: transform 0.25s cubic-bezier(0.22,1,0.36,1);
-  background: var(--bg-secondary);
+  width:136px; height:180px; border-radius:var(--radius); overflow:hidden;
+  position:relative; border:1px solid var(--border);
+  transition:transform 0.25s cubic-bezier(0.22,1,0.36,1), box-shadow 0.2s;
+  background:var(--bg3);
 }
-.cat-slide:active .cat-img-box { transform: scale(0.94); }
+.cat-slide:active .cat-img-box { transform:scale(0.94); }
+.cat-img-box:hover { border-color:var(--border2); box-shadow:var(--glow-cyan); }
 .cat-img-box img {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  opacity: 0;
-  transition: opacity 0.5s ease;
-  z-index: 2;
+  position:absolute; inset:0; width:100%; height:100%;
+  object-fit:cover; opacity:0; transition:opacity 0.5s ease; z-index:2;
 }
-.cat-img-box img.on { opacity: 1; }
+.cat-img-box img.on { opacity:1; }
 .cat-img-box::after {
-  content: '';
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  height: 55%;
-  background: linear-gradient(transparent, rgba(0,0,0,0.72));
-  z-index: 3;
-  pointer-events: none;
+  content:''; position:absolute; inset:0; z-index:3;
+  background:linear-gradient(transparent 45%,rgba(0,0,0,0.75));
 }
 .cat-name-tag {
-  position: absolute;
-  bottom: 10px;
-  left: 0;
-  right: 0;
-  z-index: 5;
-  text-align: center;
-  font-family: var(--font-display);
-  font-size: 9px;
-  font-weight: 700;
-  letter-spacing: 2px;
-  text-transform: uppercase;
-  color: #fff;
-  text-shadow: 0 1px 6px rgba(0,0,0,0.9);
+  position:absolute; bottom:9px; left:0; right:0; z-index:4;
+  text-align:center; font-family:var(--font-display);
+  font-size:10px; font-weight:800; letter-spacing:2px;
+  text-transform:uppercase; color:#fff;
+  text-shadow:0 0 10px rgba(0,240,255,0.4), 0 1px 6px rgba(0,0,0,0.8);
 }
 .cat-label {
-  font-family: var(--font-display);
-  font-size: 9px;
-  font-weight: 600;
-  letter-spacing: 1.5px;
-  text-transform: uppercase;
-  text-align: center;
-  color: var(--text-muted);
-  white-space: nowrap;
+  font-family:var(--font-display); font-size:10px; font-weight:700;
+  color:var(--text2); text-align:center; letter-spacing:1.5px; text-transform:uppercase;
 }
 
 /* ── FEATURED SLIDER ── */
 .feat-slider-wrap {
-  position: relative;
-  width: 100%;
-  border-radius: var(--radius);
-  overflow: hidden;
-  aspect-ratio: 16/9;
-  background: var(--bg-secondary);
-  box-shadow: var(--shadow-lg);
+  border-radius:var(--radius); overflow:hidden;
+  position:relative; border:1px solid var(--border);
+  box-shadow:0 8px 32px rgba(0,0,0,0.4);
 }
 .feat-slider-track {
-  display: flex;
-  width: 100%;
-  height: 100%;
-  transition: transform 0.55s cubic-bezier(0.4,0,0.2,1);
+  display:flex; transition:transform 0.48s cubic-bezier(0.4,0,0.2,1);
 }
 .feat-slide-item {
-  flex-shrink: 0;
-  width: 100%;
-  height: 100%;
-  position: relative;
-  cursor: pointer;
-  text-decoration: none;
-  display: block;
+  flex-shrink:0; width:100%; aspect-ratio:16/9; position:relative;
+  overflow:hidden; cursor:pointer; background:var(--bg3);
 }
 .feat-slide-item img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  opacity: 0;
-  transition: opacity 0.5s ease;
-  position: absolute;
-  inset: 0;
-  z-index: 2;
+  position:absolute; inset:0; width:100%; height:100%;
+  object-fit:cover; opacity:0; transition:opacity 0.5s; z-index:2;
 }
-.feat-slide-item img.on { opacity: 1; }
+.feat-slide-item img.on { opacity:1; }
 .feat-slide-label {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  z-index: 5;
-  padding: 10px 14px;
-  background: linear-gradient(transparent, rgba(0,0,0,0.75));
-  font-family: var(--font-display);
-  font-size: 11px;
-  font-weight: 700;
-  color: #fff;
-  letter-spacing: 1.5px;
-  text-transform: uppercase;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  position:absolute; bottom:0; left:0; right:0; z-index:5;
+  padding:14px 16px;
+  background:linear-gradient(transparent,rgba(0,0,0,0.8));
+  font-family:var(--font-display); font-size:13px; font-weight:800;
+  color:#fff; letter-spacing:1px; text-transform:uppercase;
 }
+.feat-arrows {
+  position:absolute; top:50%; transform:translateY(-50%);
+  width:100%; display:flex; justify-content:space-between;
+  padding:0 10px; z-index:10; pointer-events:none;
+}
+.feat-arr-btn {
+  width:32px; height:32px; border-radius:50%;
+  background:rgba(0,0,0,0.5); backdrop-filter:blur(8px);
+  border:1px solid rgba(255,255,255,0.15); color:#fff;
+  display:flex; align-items:center; justify-content:center;
+  cursor:pointer; pointer-events:all; transition:var(--transition);
+  font-size:14px;
+}
+.feat-arr-btn:active { background:rgba(0,240,255,0.2); border-color:var(--cyan); }
 .feat-dots {
-  display: flex;
-  justify-content: center;
-  gap: 6px;
-  margin-top: 12px;
+  display:flex; justify-content:center; gap:6px; margin-top:10px;
 }
 .feat-dot {
-  width: 5px;
-  height: 5px;
-  border-radius: 50%;
-  background: rgba(0,0,0,0.15);
-  transition: all 0.3s ease;
-  cursor: pointer;
+  width:6px; height:6px; border-radius:50%;
+  background:var(--border2); cursor:pointer;
+  transition:var(--transition);
 }
-.feat-dot.active { background: var(--text); width: 18px; border-radius: 3px; }
+.feat-dot.active {
+  width:18px; border-radius:3px; background:var(--cyan);
+  box-shadow:0 0 8px rgba(0,240,255,0.5);
+}
 
 /* ── MARQUEE ── */
 .marquee {
-  background: var(--text);
-  color: #fff;
-  padding: 10px 0;
-  overflow: hidden;
-  white-space: nowrap;
-  margin: 28px -16px;
+  overflow:hidden; white-space:nowrap;
+  border-top:1px solid var(--border); border-bottom:1px solid var(--border);
+  padding:10px 0; margin:20px 0;
+  background:var(--bg2);
 }
 .marquee-inner {
-  display: inline-block;
-  animation: marqueeScroll 22s linear infinite;
-  font-family: var(--font-display);
-  font-size: 9px;
-  font-weight: 700;
-  letter-spacing: 4px;
-  text-transform: uppercase;
-  color: rgba(255,255,255,0.55);
+  display:inline-block;
+  animation:marquee 22s linear infinite;
+  font-family:var(--font-display); font-size:9px; font-weight:700;
+  letter-spacing:4px; color:var(--text3); text-transform:uppercase;
 }
-@keyframes marqueeScroll {
-  0% { transform: translateX(100vw); }
-  100% { transform: translateX(-100%); }
-}
-
-/* ── COVER CARD ── */
-.cover-card {
-  display: block;
-  text-decoration: none;
-  border-radius: var(--radius);
-  overflow: hidden;
-  border: 1px solid var(--border);
-  box-shadow: var(--shadow);
-  transition: transform 0.25s cubic-bezier(0.22,1,0.36,1), box-shadow 0.2s ease;
-  position: relative;
-}
-.cover-card:active { transform: scale(0.97); box-shadow: var(--shadow-sm); }
-.cover-img {
-  width: 100%;
-  aspect-ratio: 16/9;
-  position: relative;
-  overflow: hidden;
-  background: var(--bg-secondary);
-}
-.cover-img img {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  opacity: 0;
-  transition: opacity 0.5s ease;
-  z-index: 2;
-}
-.cover-img img.on { opacity: 1; }
-.cover-img::after {
-  content: '';
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  height: 55%;
-  background: linear-gradient(transparent, rgba(0,0,0,0.72));
-  z-index: 3;
-}
-.cover-tag {
-  position: absolute;
-  bottom: 12px;
-  left: 14px;
-  right: 14px;
-  z-index: 4;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-.cover-tag-name {
-  font-family: var(--font-display);
-  font-size: 14px;
-  font-weight: 700;
-  color: #fff;
-  letter-spacing: 2px;
-  text-transform: uppercase;
-  text-shadow: 0 1px 8px rgba(0,0,0,0.7);
-}
-.cover-tag-btn {
-  background: rgba(255,255,255,0.18);
-  backdrop-filter: blur(8px);
-  border: 1px solid rgba(255,255,255,0.25);
-  border-radius: 20px;
-  font-family: var(--font-display);
-  font-size: 8px;
-  font-weight: 700;
-  letter-spacing: 1.5px;
-  color: #fff;
-  padding: 4px 10px;
-  text-transform: uppercase;
-}
+@keyframes marquee { from{transform:translateX(0)} to{transform:translateX(-50%)} }
 
 /* ── PFP GRID ── */
-.pfp-grid { display: grid; grid-template-columns: 3fr 1fr; gap: 10px; }
+.pfp-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
 .pfp-cover-card {
-  display: block;
-  text-decoration: none;
-  border-radius: var(--radius);
-  overflow: hidden;
-  border: 1px solid var(--border);
-  box-shadow: var(--shadow);
-  transition: transform 0.25s cubic-bezier(0.22,1,0.36,1);
-  position: relative;
+  border-radius:var(--radius); overflow:hidden; display:block;
+  text-decoration:none; position:relative;
+  border:1px solid var(--border);
+  transition:transform 0.25s cubic-bezier(0.22,1,0.36,1), box-shadow 0.2s;
 }
-.pfp-cover-card:active { transform: scale(0.95); }
+.pfp-cover-card:active { transform:scale(0.95); }
+.pfp-cover-card:hover { border-color:var(--border2); box-shadow:var(--glow-purple); }
 .pfp-cover-img {
-  width: 100%;
-  aspect-ratio: 1/1;
-  position: relative;
-  overflow: hidden;
-  background: var(--bg-secondary);
+  width:100%; aspect-ratio:1/1; position:relative;
+  overflow:hidden; background:var(--bg3);
 }
 .pfp-cover-img img {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  opacity: 0;
-  transition: opacity 0.5s ease;
-  z-index: 2;
+  position:absolute; inset:0; width:100%; height:100%;
+  object-fit:cover; opacity:0; transition:opacity 0.5s ease; z-index:2;
 }
-.pfp-cover-img img.on { opacity: 1; }
+.pfp-cover-img img.on { opacity:1; }
 .pfp-cover-img::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  z-index: 3;
-  background: linear-gradient(transparent 45%, rgba(0,0,0,0.65));
+  content:''; position:absolute; inset:0; z-index:3;
+  background:linear-gradient(transparent 40%,rgba(0,0,0,0.8));
 }
 .pfp-cover-name {
-  position: absolute;
-  bottom: 9px;
-  left: 0;
-  right: 0;
-  z-index: 4;
-  text-align: center;
-  font-family: var(--font-display);
-  font-size: 9px;
-  font-weight: 700;
-  letter-spacing: 2px;
-  text-transform: uppercase;
-  color: #fff;
-  text-shadow: 0 1px 6px rgba(0,0,0,0.8);
+  position:absolute; bottom:9px; left:0; right:0; z-index:4;
+  text-align:center; font-family:var(--font-display);
+  font-size:9px; font-weight:800; letter-spacing:2.5px;
+  text-transform:uppercase; color:#fff;
+  text-shadow:0 0 8px rgba(192,38,211,0.5), 0 1px 6px rgba(0,0,0,0.8);
 }
 
+/* ── COVER CARDS ── */
+.cover-card {
+  display:block; text-decoration:none; color:var(--text);
+  border-radius:var(--radius); overflow:hidden;
+  border:1px solid var(--border);
+  transition:transform 0.25s cubic-bezier(0.22,1,0.36,1), box-shadow 0.2s;
+}
+.cover-card:active { transform:scale(0.97); }
+.cover-card:hover { border-color:var(--border2); box-shadow:var(--glow-cyan); }
+.cover-img {
+  position:relative; width:100%; aspect-ratio:16/5;
+  overflow:hidden; background:var(--bg3);
+}
+.cover-img img {
+  position:absolute; inset:0; width:100%; height:100%;
+  object-fit:cover; opacity:0; transition:opacity 0.5s ease; z-index:2;
+}
+.cover-img img.on { opacity:1; }
+.cover-tag {
+  position:absolute; inset:0; z-index:5;
+  display:flex; align-items:center; justify-content:space-between;
+  padding:0 18px;
+  background:linear-gradient(90deg,rgba(0,0,0,0.7) 0%,rgba(0,0,0,0.2) 60%,transparent);
+}
+.cover-tag-name {
+  font-family:var(--font-display); font-size:16px; font-weight:900;
+  letter-spacing:3px; text-transform:uppercase; color:#fff;
+  text-shadow:0 0 14px rgba(0,240,255,0.4);
+}
+.cover-tag-btn {
+  background:var(--cyan); color:#000; padding:6px 14px;
+  border-radius:20px; font-family:var(--font-display);
+  font-size:9px; font-weight:800; letter-spacing:2px; text-transform:uppercase;
+  box-shadow:0 0 12px rgba(0,240,255,0.4);
+}
 .cover-empty {
-  padding: 32px 20px;
-  text-align: center;
-  border-radius: var(--radius);
-  border: 1.5px dashed var(--border-strong);
-  background: var(--bg-secondary);
+  padding:32px 20px; text-align:center; border-radius:var(--radius);
+  border:1.5px dashed var(--border); background:var(--bg2);
 }
 .cover-empty-text {
-  font-family: var(--font-display);
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: 2px;
-  text-transform: uppercase;
-  color: var(--text-muted);
+  font-family:var(--font-display); font-size:10px; font-weight:700;
+  letter-spacing:2px; text-transform:uppercase; color:var(--text3);
 }
 </style>
 </head>
@@ -476,11 +261,11 @@
 <div id="header"></div>
 
 <div class="hero">
-  <div class="hero-shim" id="heroShim"></div>
-  <img class="hero-img" id="heroImg" alt="">
+  <div class="hero-shim shim" id="heroShim"></div>
+  <img class="hero-img" id="heroImg" alt="Thumblyst Premium GFX" loading="eager">
   <div class="hero-pill" id="heroBadge">PREMIUM GFX</div>
   <div class="hero-overlay">
-    <div class="hero-title" id="heroHeadline">THUMBLYST</div>
+    <div class="hero-title" id="heroHeadline"><span style="color:var(--text)">THUMB</span>LYST</div>
     <div class="hero-sub" id="heroSubtitle">Gaming Graphics · Overlays · Backgrounds</div>
   </div>
 </div>
@@ -488,9 +273,7 @@
 <div class="t-container">
   <a class="spin-banner t-fade" href="spin.html">
     <div class="spin-icon-ring">
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#0a0a0a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/>
-      </svg>
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
     </div>
     <div class="spin-info">
       <h3>Daily Spin</h3>
@@ -502,16 +285,16 @@
   <div class="t-section-title t-fade">Thumbnails <span class="sec-badge">HOT</span></div>
   <div class="cat-track" id="catTrack"></div>
 
-  <div class="t-section-title t-fade">Featured</div>
+  <div class="t-section-title t-fade" style="margin-top:32px">Featured</div>
   <div id="featWrap"></div>
 
-  <div class="marquee">
+  <div class="marquee" aria-hidden="true">
     <div class="marquee-inner">
-      PREMIUM QUALITY &nbsp;·&nbsp; INSTANT DELIVERY &nbsp;·&nbsp; 4K RESOLUTION &nbsp;·&nbsp; CUSTOM THUMBNAILS &nbsp;·&nbsp; GAMING OVERLAYS &nbsp;·&nbsp; FREE FIRE &nbsp;·&nbsp; BGMI &nbsp;·&nbsp; VALORANT &nbsp;·&nbsp;
+      PREMIUM QUALITY &nbsp;·&nbsp; INSTANT DELIVERY &nbsp;·&nbsp; 4K RESOLUTION &nbsp;·&nbsp; CUSTOM THUMBNAILS &nbsp;·&nbsp; GAMING OVERLAYS &nbsp;·&nbsp; FREE FIRE &nbsp;·&nbsp; BGMI &nbsp;·&nbsp; VALORANT &nbsp;·&nbsp; PREMIUM QUALITY &nbsp;·&nbsp; INSTANT DELIVERY &nbsp;·&nbsp; 4K RESOLUTION &nbsp;·&nbsp; CUSTOM THUMBNAILS &nbsp;·&nbsp; GAMING OVERLAYS &nbsp;·&nbsp; FREE FIRE &nbsp;·&nbsp; BGMI &nbsp;·&nbsp; VALORANT &nbsp;·&nbsp;
     </div>
   </div>
 
-  <div class="t-section-title t-fade">Profile Pictures <span class="sec-badge">PFP</span></div>
+  <div class="t-section-title t-fade">Profile Pictures <span class="sec-badge sec-badge-pfp">PFP</span></div>
   <div class="pfp-grid" id="pfpGrid"></div>
 
   <div class="t-section-title t-fade" style="margin-top:28px">Backgrounds</div>
@@ -529,28 +312,17 @@ document.getElementById('header').innerHTML = headerHTML();
 document.getElementById('footer').innerHTML = footerHTML();
 const { auth, db } = initApp();
 
-auth.onAuthStateChanged(user => {
-  if (user && !user.isAnonymous) {
-    db.collection('users').doc(user.uid).onSnapshot(doc => {
-      const coins = doc.exists ? (doc.data().coins || 0) : 0;
-      if (coins > 0) {
-        const logo = document.querySelector('.t-logo');
-        if (logo) logo.innerHTML = `THUMBLYST <span style="font-size:9px;font-weight:600;opacity:0.35;letter-spacing:1px;margin-left:4px;font-family:var(--font-body)"></span>`;
-      }
-    });
-  }
-});
-
+// ─── HERO ───
 async function loadHero() {
   try {
     const s = await db.collection('settings').doc('hero').get();
     const data = s.exists ? s.data() : {};
-    if (data.headline) document.getElementById('heroHeadline').textContent = data.headline;
+    if (data.headline) document.getElementById('heroHeadline').innerHTML = data.headline;
     if (data.subtitle) document.getElementById('heroSubtitle').textContent = data.subtitle;
     const badge = document.getElementById('heroBadge');
     if (data.badgeText !== undefined) {
       if (!data.badgeText) badge.style.display = 'none';
-      else badge.textContent = data.badgeText;
+      else { badge.textContent = data.badgeText; }
     }
     if (data.imageUrl) {
       const i = document.getElementById('heroImg');
@@ -561,6 +333,7 @@ async function loadHero() {
   } catch(_) { document.getElementById('heroShim').classList.add('off'); }
 }
 
+// ─── CATEGORY CARDS ───
 const CATS = [
   { name: 'Free Fire', cat: 'ff' },
   { name: 'BGMI', cat: 'bgmi' },
@@ -572,9 +345,9 @@ const catTrack = document.getElementById('catTrack');
 CATS.forEach((c, i) => {
   const uid = 'c-' + c.cat;
   catTrack.innerHTML += `
-    <a class="cat-slide t-fade" href="listing.html?cat=${c.cat}" style="transition-delay:${i*0.07}s">
+    <a class="cat-slide t-fade" href="listing.html?cat=${c.cat}" style="transition-delay:${i*0.07}s" aria-label="${c.name} thumbnails">
       <div class="cat-img-box">
-        <img id="im-${uid}" alt="${c.name}">
+        <img id="im-${uid}" alt="${c.name}" loading="lazy">
         <div class="shim" id="sh-${uid}"></div>
         <div class="cat-name-tag">${c.name}</div>
       </div>
@@ -587,81 +360,84 @@ async function loadCatCovers() {
     const uid = 'c-' + c.cat;
     let url = null;
     try { const s = await db.collection('categories').doc(c.cat).get(); if (s.exists && s.data().coverUrl) url = s.data().coverUrl; } catch(_) {}
-    if (!url) { try { const s = await db.collection('products').where('category','==',c.cat).limit(1).get(); if (!s.empty) url = s.docs[0].data().imageUrl || null; } catch(_) {} }
+    if (!url) { try { const s = await db.collection('products').where('category','==',c.cat).limit(1).get(); if (!s.empty) url = s.docs[0].data().imageUrl||null; } catch(_) {} }
     const img = document.getElementById('im-'+uid), shim = document.getElementById('sh-'+uid);
-    if (!url) { shim.classList.add('off'); }
-    else { img.onload = () => { img.classList.add('on'); shim.classList.add('off'); }; img.onerror = () => { shim.classList.add('off'); }; img.src = url; }
+    if (!url) { if(shim) shim.classList.add('off'); }
+    else { img.onload=()=>{img.classList.add('on');shim.classList.add('off');}; img.onerror=()=>{shim.classList.add('off');}; img.src=url; }
   }
 }
 
+// ─── FEATURED SLIDER ───
 async function loadFeatured() {
   const wrap = document.getElementById('featWrap');
-  let featDocs = [];
+  let docs = [];
   try {
     const fs = await db.collection('products').where('featured','==',true).limit(8).get();
-    featDocs = fs.docs;
-    if (!featDocs.length) { const as = await db.collection('products').limit(8).get(); featDocs = as.docs; }
+    docs = fs.docs;
+    if (!docs.length) { const as = await db.collection('products').limit(8).get(); docs = as.docs; }
   } catch(_) {}
 
-  if (!featDocs.length) { wrap.innerHTML = '<div class="t-empty">No featured products right now</div>'; return; }
-
-  let slidesHTML = featDocs.map(doc => {
-    const d = doc.data();
-    return `<a class="feat-slide-item" href="view.html?id=${doc.id}">
-      <div class="feat-slide-shim" id="fsh-${doc.id}"></div>
-      <img id="fim-${doc.id}" alt="${d.title || 'Product'}">
-      <div class="feat-slide-label">${d.title || ''}</div>
-    </a>`;
-  }).join('');
-
-  let dotsHTML = featDocs.map((_,i) => `<div class="feat-dot${i===0?' active':''}" data-i="${i}"></div>`).join('');
+  if (!docs.length) { wrap.innerHTML = '<div class="t-empty">No featured products right now</div>'; return; }
 
   wrap.innerHTML = `
     <div class="feat-slider-wrap t-fade">
-      <div class="feat-slider-track" id="featTrack">${slidesHTML}</div>
+      <div class="feat-slider-track" id="featTrack">
+        ${docs.map(doc => `<div class="feat-slide-item" data-id="${doc.id}" onclick="location.href='view.html?id=${doc.id}'" role="button" tabindex="0">
+          <div class="feat-slide-shim" id="fsh-${doc.id}"></div>
+          <img id="fim-${doc.id}" alt="${(doc.data().title||'').replace(/"/g,'&quot;')}" loading="lazy">
+          <div class="feat-slide-label">${doc.data().title||''}</div>
+        </div>`).join('')}
+      </div>
+      <div class="feat-arrows">
+        <button class="feat-arr-btn" id="featPrev" aria-label="Previous">&#8249;</button>
+        <button class="feat-arr-btn" id="featNext" aria-label="Next">&#8250;</button>
+      </div>
     </div>
-    <div class="feat-dots" id="featDots">${dotsHTML}</div>`;
+    <div class="feat-dots" id="featDots">
+      ${docs.map((_,i)=>`<div class="feat-dot${i===0?' active':''}" data-i="${i}" role="button" tabindex="0" aria-label="Slide ${i+1}"></div>`).join('')}
+    </div>`;
 
-  featDocs.forEach(doc => {
-    const url = doc.data().imageUrl || null;
-    const img = document.getElementById('fim-'+doc.id), shim = document.getElementById('fsh-'+doc.id);
-    if (!url) { if (shim) shim.classList.add('off'); }
-    else { img.onload = () => { img.classList.add('on'); if (shim) shim.classList.add('off'); }; img.onerror = () => { if (shim) shim.classList.add('off'); }; img.src = url; }
+  docs.forEach(doc => {
+    const url = doc.data().imageUrl||null, img = document.getElementById('fim-'+doc.id), shim = document.getElementById('fsh-'+doc.id);
+    if (!url) { if(shim) shim.classList.add('off'); }
+    else { img.onload=()=>{img.classList.add('on');if(shim)shim.classList.add('off');}; img.onerror=()=>{if(shim)shim.classList.add('off');}; img.src=url; }
   });
 
-  let current = 0;
-  const track = document.getElementById('featTrack');
+  let cur = 0; const track = document.getElementById('featTrack'); const total = docs.length;
   const dots = document.querySelectorAll('.feat-dot');
-  const total = featDocs.length;
   function goTo(idx) {
-    current = (idx + total) % total;
-    track.style.transform = `translateX(-${current * 100}%)`;
-    dots.forEach((d,i) => d.classList.toggle('active', i === current));
+    cur = ((idx % total) + total) % total;
+    track.style.transform = `translateX(-${cur * 100}%)`;
+    dots.forEach((d,i) => d.classList.toggle('active', i === cur));
   }
   dots.forEach(d => d.addEventListener('click', () => goTo(parseInt(d.dataset.i))));
-  let timer = setInterval(() => goTo(current + 1), 3200);
+  document.getElementById('featPrev').addEventListener('click', () => goTo(cur - 1));
+  document.getElementById('featNext').addEventListener('click', () => goTo(cur + 1));
+
+  let timer = setInterval(() => goTo(cur + 1), 3500);
   const sliderEl = wrap.querySelector('.feat-slider-wrap');
-  let startX = 0;
-  sliderEl.addEventListener('touchstart', e => { startX = e.touches[0].clientX; clearInterval(timer); }, {passive:true});
+  let sx = 0;
+  sliderEl.addEventListener('touchstart', e => { sx = e.touches[0].clientX; clearInterval(timer); }, {passive:true});
   sliderEl.addEventListener('touchend', e => {
-    const dx = e.changedTouches[0].clientX - startX;
-    if (Math.abs(dx) > 40) goTo(current + (dx < 0 ? 1 : -1));
-    timer = setInterval(() => goTo(current + 1), 3200);
+    const dx = e.changedTouches[0].clientX - sx;
+    if (Math.abs(dx) > 40) goTo(cur + (dx < 0 ? 1 : -1));
+    timer = setInterval(() => goTo(cur + 1), 3500);
   }, {passive:true});
   reObserve();
 }
 
+// ─── COVER CARD ───
 async function loadCoverCard(containerId, cat, label, linkHref) {
   const el = document.getElementById(containerId);
   let url = null;
   try { const s = await db.collection('categories').doc(cat).get(); if (s.exists && s.data().coverUrl) url = s.data().coverUrl; } catch(_) {}
-  if (!url) { try { const s = await db.collection('products').where('category','==',cat).limit(1).get(); if (!s.empty) url = s.docs[0].data().imageUrl || null; } catch(_) {} }
+  if (!url) { try { const s = await db.collection('products').where('category','==',cat).limit(1).get(); if (!s.empty) url = s.docs[0].data().imageUrl||null; } catch(_) {} }
   if (!url) { el.innerHTML = `<div class="cover-empty t-fade"><div class="cover-empty-text">No ${label} right now</div></div>`; reObserve(); return; }
-  const uid = 'cv-' + cat;
+  const uid = 'cv-'+cat;
   el.innerHTML = `
-    <a class="cover-card t-fade" href="${linkHref}">
+    <a class="cover-card t-fade" href="${linkHref}" aria-label="${label}">
       <div class="cover-img">
-        <img id="im-${uid}" alt="${label}">
+        <img id="im-${uid}" alt="${label}" loading="lazy">
         <div class="cv-shim" id="sh-${uid}"></div>
         <div class="cover-tag">
           <span class="cover-tag-name">${label}</span>
@@ -670,30 +446,38 @@ async function loadCoverCard(containerId, cat, label, linkHref) {
       </div>
     </a>`;
   const img = document.getElementById('im-'+uid), shim = document.getElementById('sh-'+uid);
-  img.onload = () => { img.classList.add('on'); shim.classList.add('off'); };
-  img.onerror = () => { shim.classList.add('off'); };
-  img.src = url;
+  img.onload=()=>{img.classList.add('on');shim.classList.add('off');}; img.onerror=()=>{shim.classList.add('off');}; img.src=url;
   reObserve();
 }
 
+// ─── PFP GRID ───
 async function loadPfpGrid() {
   const grid = document.getElementById('pfpGrid');
   grid.innerHTML = '';
-  const p = { name: 'All PFPs', cat: 'pfp' }, uid = 'pfp-pfp';
   let url = null;
   try { const s = await db.collection('categories').doc('pfp').get(); if (s.exists && s.data().coverUrl) url = s.data().coverUrl; } catch(_) {}
-  if (!url) { try { const s = await db.collection('products').where('category','==','pfp').limit(1).get(); if (!s.empty) url = s.docs[0].data().imageUrl || null; } catch(_) {} }
+  if (!url) { try { const s = await db.collection('products').where('category','==','pfp').limit(1).get(); if (!s.empty) url = s.docs[0].data().imageUrl||null; } catch(_) {} }
+  const uid = 'pfp-pfp';
   grid.innerHTML = `
-    <a class="pfp-cover-card t-fade" href="view.html?gallery=pfp">
+    <a class="pfp-cover-card t-fade" href="view.html?gallery=pfp" aria-label="All PFPs">
       <div class="pfp-cover-img">
-        <img id="im-${uid}" alt="PFPs">
+        <img id="im-${uid}" alt="Profile Pictures" loading="lazy">
         <div class="cv-shim" id="sh-${uid}"></div>
       </div>
       <div class="pfp-cover-name">All PFPs</div>
+    </a>
+    <a class="pfp-cover-card t-fade" href="listing.html?cat=pfp" style="transition-delay:0.06s" aria-label="Browse PFPs">
+      <div class="pfp-cover-img" style="background:linear-gradient(135deg,var(--bg3),var(--bg4));display:flex;align-items:center;justify-content:center;">
+        <div style="text-align:center;padding:20px;">
+          <div style="font-family:var(--font-display);font-size:28px;font-weight:900;color:var(--purple);text-shadow:var(--glow-purple)">PFP</div>
+          <div style="font-family:var(--font-display);font-size:9px;font-weight:700;letter-spacing:2px;color:var(--text3);margin-top:6px">CUSTOM</div>
+        </div>
+      </div>
+      <div class="pfp-cover-name" style="color:var(--purple)">Custom Order</div>
     </a>`;
   const img = document.getElementById('im-'+uid), shim = document.getElementById('sh-'+uid);
-  if (!url) { shim.classList.add('off'); }
-  else { img.onload = () => { img.classList.add('on'); shim.classList.add('off'); }; img.onerror = () => { shim.classList.add('off'); }; img.src = url; }
+  if (!url) { if(shim) shim.classList.add('off'); }
+  else { img.onload=()=>{img.classList.add('on');shim.classList.add('off');}; img.onerror=()=>{shim.classList.add('off');}; img.src=url; }
   reObserve();
 }
 

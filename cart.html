@@ -11,87 +11,54 @@
 <style id="shared"></style>
 <style>
 .cart-item {
-  display: flex;
-  gap: 13px;
-  padding: 14px;
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  margin-bottom: 12px;
-  align-items: center;
-  background: #fff;
-  box-shadow: var(--shadow-sm);
-  animation: pageIn 0.4s ease both;
+  display:flex; gap:13px; padding:14px;
+  border:1px solid var(--border); border-radius:var(--radius);
+  margin-bottom:12px; align-items:center;
+  background:var(--bg2); box-shadow:0 2px 16px rgba(0,0,0,0.3);
+  animation:pageIn 0.4s ease both; transition:border-color 0.2s;
 }
+.cart-item:hover { border-color:var(--border2); }
 .cart-thumb {
-  width: 80px;
-  height: 60px;
-  border-radius: var(--radius-sm);
-  object-fit: cover;
-  background: var(--bg-secondary);
-  flex-shrink: 0;
+  width:80px; height:60px; border-radius:var(--radius-sm);
+  object-fit:cover; background:var(--bg3); flex-shrink:0;
+  border:1px solid var(--border);
 }
-.cart-info { flex: 1; min-width: 0; }
+.cart-info { flex:1; min-width:0; }
 .cart-info h4 {
-  font-family: var(--font-display);
-  font-size: 13px;
-  font-weight: 700;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  margin-bottom: 4px;
-  color: var(--text);
+  font-family:var(--font-display); font-size:13px; font-weight:700;
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+  margin-bottom:4px; color:var(--text); letter-spacing:0.5px;
 }
 .cart-price {
-  font-family: var(--font-display);
-  font-size: 14px;
-  font-weight: 700;
-  color: var(--text);
+  font-family:var(--font-mono); font-size:14px; font-weight:700;
+  color:var(--cyan); text-shadow:0 0 8px rgba(0,240,255,0.3);
 }
-.cart-meta { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+.cart-meta { font-size:11px; color:var(--text3); margin-top:3px; font-weight:500; }
 .cart-remove {
-  width: 34px;
-  height: 34px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border: none;
-  background: #fff1f2;
-  color: var(--danger);
-  border-radius: 50%;
-  flex-shrink: 0;
-  transition: var(--transition);
+  width:36px; height:36px; display:flex; align-items:center; justify-content:center;
+  border:1px solid rgba(255,56,96,0.25); background:rgba(255,56,96,0.07);
+  color:var(--red); border-radius:9px; flex-shrink:0; transition:var(--transition); cursor:pointer;
 }
-.cart-remove:active { transform: scale(0.88); }
+.cart-remove:active { transform:scale(0.88); background:rgba(255,56,96,0.15); }
 .cart-total-box {
-  background: var(--bg-secondary);
-  border-radius: var(--radius);
-  padding: 18px;
-  margin: 20px 0;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  border: 1px solid var(--border);
+  background:var(--bg2); border-radius:var(--radius);
+  padding:18px; margin:20px 0;
+  display:flex; justify-content:space-between; align-items:center;
+  border:1px solid var(--border);
 }
 .cart-total-label {
-  font-family: var(--font-display);
-  font-size: 9px;
-  font-weight: 700;
-  letter-spacing: 2px;
-  text-transform: uppercase;
-  color: var(--text-muted);
-  margin-bottom: 4px;
+  font-family:var(--font-display); font-size:9px; font-weight:700;
+  letter-spacing:3px; text-transform:uppercase; color:var(--text3); margin-bottom:6px;
 }
 .cart-total-amt {
-  font-family: var(--font-display);
-  font-size: 24px;
-  font-weight: 800;
-  color: var(--text);
+  font-family:var(--font-mono); font-size:26px; font-weight:700;
+  color:var(--cyan); text-shadow:0 0 14px rgba(0,240,255,0.4);
 }
 </style>
 </head>
 <body>
 <div class="back-header">
-  <button class="back-btn" id="backBtn" onclick="history.back()"></button>
+  <button class="back-btn" id="backBtn" onclick="history.back()" aria-label="Back"></button>
   <h2>My Cart</h2>
 </div>
 
@@ -102,54 +69,60 @@
       <div class="cart-total-label">Order Total</div>
       <div class="cart-total-amt">&#8377;<span id="total">0</span></div>
     </div>
-    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="rgba(0,0,0,0.12)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="rgba(0,240,255,0.12)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
   </div>
-  <button class="t-btn t-btn-primary" onclick="location.href='payment.html'">Proceed to Checkout</button>
+  <button class="t-btn t-btn-primary" onclick="location.href='payment.html'" aria-label="Proceed to checkout">PROCEED TO CHECKOUT</button>
 </div>
 
 <script>
 document.getElementById('shared').textContent = SHARED_CSS;
 document.getElementById('backBtn').innerHTML = ICONS.back;
-firebase.initializeApp(firebaseConfig);
+
+let app;
+try { app = firebase.app(); } catch(e) { firebase.initializeApp(firebaseConfig); }
 const auth = firebase.auth(), db = firebase.firestore();
 const cartBox = document.getElementById('cartBox'), totalEl = document.getElementById('total');
 
 auth.onAuthStateChanged(async user => {
-  if (!user) user = (await auth.signInAnonymously()).user;
-  loadCart(user.uid);
+  if (!user) user = (await auth.signInAnonymously().catch(()=>null))?.user;
+  if (user) loadCart(user.uid);
+  else { cartBox.innerHTML = '<div class="t-empty">Sign in to view cart</div>'; }
 });
 
 async function loadCart(uid) {
-  const snap = await db.collection('users').doc(uid).collection('cart').get();
-  cartBox.innerHTML = '';
-  let total = 0;
-  if (snap.empty) { cartBox.innerHTML = '<div class="t-empty">Your cart is empty</div>'; totalEl.textContent = '0'; return; }
-  snap.forEach(doc => {
-    const d = doc.data(), docId = doc.id, price = Number(d.Price||d.price||0);
-    total += price;
-    const imgSrc = d.Thumbnail||d.imageUrl||d.image||'';
-    cartBox.innerHTML += `
-      <div class="cart-item" id="cart-${docId}">
-        <img class="cart-thumb" src="${imgSrc}" alt="${d.Title||'Item'}" onerror="this.style.background='var(--bg-secondary)'">
-        <div class="cart-info">
-          <h4>${d.Title||d.title||'Untitled'}</h4>
-          <div class="cart-price">&#8377;${price}</div>
-          ${d.CustomText ? `<div class="cart-meta">Text: ${d.CustomText}</div>` : ''}
-          ${d.WhatsApp ? `<div class="cart-meta">WA: ${d.WhatsApp}</div>` : ''}
-        </div>
-        <button class="cart-remove" onclick="removeItem('${uid}','${docId}',${price})">${ICONS.trash}</button>
-      </div>`;
-  });
-  totalEl.textContent = total;
+  try {
+    const snap = await db.collection('users').doc(uid).collection('cart').get();
+    cartBox.innerHTML = ''; let total = 0;
+    if (snap.empty) { cartBox.innerHTML = '<div class="t-empty">Your cart is empty</div>'; totalEl.textContent = '0'; return; }
+    snap.forEach(doc => {
+      const d = doc.data(), docId = doc.id, price = Number(d.Price||d.price||0);
+      total += price;
+      const imgSrc = d.Thumbnail||d.imageUrl||d.image||'';
+      cartBox.innerHTML += `
+        <div class="cart-item" id="cart-${docId}">
+          <img class="cart-thumb" src="${imgSrc}" alt="${(d.Title||'Item').replace(/"/g,'&quot;')}" onerror="this.style.opacity='0.2'">
+          <div class="cart-info">
+            <h4>${d.Title||d.title||'Untitled'}</h4>
+            <div class="cart-price">&#8377;${price}</div>
+            ${d.CustomText ? `<div class="cart-meta">Text: ${d.CustomText}</div>` : ''}
+            ${d.WhatsApp ? `<div class="cart-meta">WA: ${d.WhatsApp}</div>` : ''}
+          </div>
+          <button class="cart-remove" onclick="removeItem('${uid}','${docId}',${price})" aria-label="Remove item">${ICONS.trash}</button>
+        </div>`;
+    });
+    totalEl.textContent = total;
+  } catch(e) { cartBox.innerHTML = '<div class="t-empty">Could not load cart</div>'; }
 }
 
 async function removeItem(uid, docId, price) {
   if (!confirm('Remove this item?')) return;
-  await db.collection('users').doc(uid).collection('cart').doc(docId).delete();
-  const el = document.getElementById('cart-'+docId);
-  if (el) { el.style.opacity = '0'; el.style.transform = 'translateX(20px)'; el.style.transition = '0.3s ease'; setTimeout(() => el.remove(), 300); }
-  totalEl.textContent = Number(totalEl.textContent) - price;
-  if (!cartBox.querySelector('.cart-item')) cartBox.innerHTML = '<div class="t-empty">Your cart is empty</div>';
+  try {
+    await db.collection('users').doc(uid).collection('cart').doc(docId).delete();
+    const el = document.getElementById('cart-'+docId);
+    if (el) { el.style.opacity='0'; el.style.transform='translateX(20px)'; el.style.transition='0.3s ease'; setTimeout(()=>el.remove(),300); }
+    const cur = Number(totalEl.textContent); totalEl.textContent = Math.max(0, cur - price);
+    if (!document.querySelector('.cart-item')) cartBox.innerHTML = '<div class="t-empty">Your cart is empty</div>';
+  } catch(e) { showToast('Could not remove item', 'error'); }
 }
 </script>
 </body>

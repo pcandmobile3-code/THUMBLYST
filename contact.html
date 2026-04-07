@@ -7,70 +7,40 @@
 <script src="config.js"></script>
 <style id="shared"></style>
 <style>
-.contact-wrap { max-width: 480px; margin: 0 auto; padding: 24px 20px 64px; animation: pageIn 0.45s ease both; }
+.contact-wrap { max-width:480px; margin:0 auto; padding:24px 20px 64px; animation:pageIn 0.45s ease both; }
 .contact-card {
-  background: #fff;
-  border: 1.5px solid var(--border);
-  border-radius: var(--radius);
-  padding: 20px;
-  margin-bottom: 12px;
-  box-shadow: var(--shadow-sm);
-  transition: var(--transition);
+  background:var(--bg2); border:1px solid var(--border);
+  border-radius:var(--radius); padding:20px; margin-bottom:12px;
+  box-shadow:0 2px 16px rgba(0,0,0,0.3); transition:var(--transition);
 }
-.contact-card:active { transform: scale(0.98); }
+.contact-card:active { transform:scale(0.98); border-color:var(--border2); }
 .contact-card-head {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin-bottom: 10px;
-  font-family: var(--font-display);
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 1.5px;
-  text-transform: uppercase;
-  color: var(--text-muted);
+  display:flex; align-items:center; gap:10px; margin-bottom:12px;
+  font-family:var(--font-display); font-size:10px; font-weight:700;
+  letter-spacing:2px; text-transform:uppercase; color:var(--text3);
 }
 .contact-card-icon {
-  width: 32px;
-  height: 32px;
-  background: var(--bg-secondary);
-  border-radius: 8px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  width:32px; height:32px; background:var(--bg3); border:1px solid var(--border);
+  border-radius:9px; display:flex; align-items:center; justify-content:center; color:var(--cyan);
 }
 .contact-card p, .contact-card a:not(.wa-btn) {
-  font-size: 14px;
-  color: var(--text);
-  font-weight: 500;
-  text-decoration: none;
-  line-height: 1.5;
+  font-family:var(--font-display); font-size:14px; color:var(--text); font-weight:600;
+  text-decoration:none; line-height:1.5; letter-spacing:0.5px;
 }
 .wa-btn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-  margin-top: 14px;
-  padding: 13px 16px;
-  background: #f0fdf4;
-  border: 1.5px solid #bbf7d0;
-  border-radius: var(--radius-sm);
-  text-decoration: none;
-  color: #15803d;
-  font-family: var(--font-display);
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 1px;
-  text-transform: uppercase;
-  transition: var(--transition);
+  display:flex; align-items:center; justify-content:center; gap:10px;
+  margin-top:14px; padding:13px 16px;
+  background:rgba(37,211,102,0.08); border:1px solid rgba(37,211,102,0.2);
+  border-radius:var(--radius-sm); text-decoration:none; color:var(--green);
+  font-family:var(--font-display); font-size:11px; font-weight:800;
+  letter-spacing:2px; text-transform:uppercase; transition:var(--transition);
 }
-.wa-btn:active { background: #dcfce7; transform: scale(0.97); }
+.wa-btn:active { background:rgba(37,211,102,0.14); transform:scale(0.97); }
 </style>
 </head>
 <body>
 <div class="back-header">
-  <button class="back-btn" id="backBtn" onclick="history.back()"></button>
+  <button class="back-btn" id="backBtn" onclick="history.back()" aria-label="Back"></button>
   <h2>Contact</h2>
 </div>
 
@@ -79,7 +49,7 @@
     <div class="contact-card-head">
       <div class="contact-card-icon" id="ic1"></div> Thumblyst
     </div>
-    <p>High-quality YouTube &amp; gaming thumbnails with fast delivery and affordable pricing.</p>
+    <p>High-quality YouTube &amp; gaming thumbnails, overlays, PFPs, and backgrounds with fast delivery and affordable pricing.</p>
   </div>
 
   <div class="contact-card t-fade">
@@ -87,7 +57,7 @@
       <div class="contact-card-icon" id="ic2"></div> WhatsApp
     </div>
     <p>+91 88289 49250</p>
-    <a class="wa-btn" href="https://wa.me/918828949250" target="_blank">
+    <a class="wa-btn" href="https://wa.me/918828949250" target="_blank" rel="noopener">
       <span id="ic2b"></span> Chat on WhatsApp
     </a>
   </div>
@@ -103,7 +73,7 @@
     <div class="contact-card-head">
       <div class="contact-card-icon" id="ic4"></div> Instagram
     </div>
-    <a href="https://www.instagram.com/thumblyst" target="_blank">@thumblyst</a>
+    <a href="https://www.instagram.com/thumblyst" target="_blank" rel="noopener" style="color:var(--purple)">@thumblyst</a>
   </div>
 </div>
 

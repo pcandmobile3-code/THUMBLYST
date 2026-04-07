@@ -10,219 +10,120 @@
 <script src="config.js"></script>
 <style id="shared"></style>
 <style>
-/* Base Styles */
-body {
-    background: #fff!important;
-    color: #0a0a0a!important;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-    margin: 0;
-    overflow-x: hidden;
+.redeem-page {
+  min-height:85vh; display:flex; align-items:center; justify-content:center; padding:20px;
 }
+.redeem-inner { width:100%; max-width:420px; }
 
-/* Centralizing Wrapper */
-.t-viewport-center {
-    min-height: 85vh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 20px;
+.redeem-hero { text-align:center; margin-bottom:28px; }
+.hero-icon-wrap {
+  background:linear-gradient(135deg,rgba(0,240,255,0.1),rgba(192,38,211,0.1));
+  border:1px solid var(--border2); width:72px; height:72px; border-radius:20px;
+  display:flex; align-items:center; justify-content:center; margin:0 auto 20px;
+  box-shadow:0 0 24px rgba(0,240,255,0.15);
 }
-
-.t-container {
-    background: #fff!important;
-    width: 100%;
-    max-width: 420px;
-    margin: 0 auto;
-}
-
-.t-header { background: rgba(255,255,255,0.95)!important; border-bottom: 1px solid rgba(0,0,0,0.05)!important; }
-.t-logo, .t-header-btn { color: #0a0a0a!important; }
-
-.redeem-hero {
-    text-align: center;
-    margin-bottom: 32px;
-}
-.hero-svg-wrap {
-    background: #0a0a0a;
-    width: 72px;
-    height: 72px;
-    border-radius: 24px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin: 0 auto 20px;
-    box-shadow: 0 10px 20px rgba(0,0,0,0.1);
-}
-.hero-svg { width: 32px; height: 32px; fill: #fff; }
-.redeem-hero h2 { 
-    font-size: 22px; 
-    font-weight: 900; 
-    letter-spacing: -0.5px; 
-    margin: 0 0 8px; 
-}
-.redeem-hero p { 
-    font-size: 14px; 
-    color: rgba(0,0,0,0.4); 
-    margin: 0; 
-}
+.hero-icon-wrap svg { width:34px; height:34px; fill:var(--cyan); }
+.redeem-hero h2 { font-family:var(--font-display); font-size:22px; font-weight:900; letter-spacing:2px; margin:0 0 8px; text-transform:uppercase; color:var(--text); }
+.redeem-hero p { font-size:13px; color:var(--text2); font-weight:500; margin:0; }
 
 .redeem-card {
-    background: #fff;
-    border: 1px solid rgba(0,0,0,0.06);
-    border-radius: 28px;
-    padding: 24px;
-    box-shadow: 0 20px 40px rgba(0,0,0,0.04);
-}
-
-.code-input-wrap {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
+  background:var(--bg2); border:1px solid var(--border); border-radius:20px;
+  padding:24px; box-shadow:0 16px 48px rgba(0,0,0,0.4);
 }
 
 .code-input {
-    width: 100%;
-    box-sizing: border-box;
-    padding: 18px;
-    background: #f9f9f9;
-    border: 2px solid transparent;
-    border-radius: 18px;
-    font-size: 18px;
-    font-weight: 800;
-    letter-spacing: 4px;
-    font-family: monospace;
-    text-transform: uppercase;
-    text-align: center;
-    transition: all 0.2s ease;
+  width:100%; padding:18px; box-sizing:border-box;
+  background:var(--bg3); border:2px solid var(--border);
+  border-radius:14px; font-family:var(--font-mono); font-size:18px; font-weight:700;
+  letter-spacing:5px; color:var(--cyan); text-transform:uppercase; text-align:center;
+  transition:var(--transition); outline:none; margin-bottom:12px;
 }
-.code-input:focus {
-    border-color: #0a0a0a;
-    background: #fff;
-    outline: none;
-    box-shadow: 0 5px 15px rgba(0,0,0,0.05);
-}
+.code-input:focus { border-color:var(--cyan); box-shadow:0 0 0 3px rgba(0,240,255,0.1), 0 0 16px rgba(0,240,255,0.15); }
+.code-input::placeholder { color:var(--text3); letter-spacing:2px; }
 
 .verify-btn {
-    width: 100%;
-    padding: 18px;
-    background: #0a0a0a;
-    color: #fff;
-    border: none;
-    border-radius: 18px;
-    font-size: 14px;
-    font-weight: 900;
-    letter-spacing: 1px;
-    text-transform: uppercase;
-    cursor: pointer;
-    transition: transform 0.2s active;
+  width:100%; padding:16px; background:linear-gradient(135deg,var(--cyan),var(--cyan2));
+  color:#000; border:none; border-radius:14px;
+  font-family:var(--font-display); font-size:13px; font-weight:900;
+  letter-spacing:3px; text-transform:uppercase; cursor:pointer; transition:var(--spring);
+  box-shadow:0 0 20px rgba(0,240,255,0.3);
 }
-.verify-btn:active { transform: scale(0.98); }
+.verify-btn:active { transform:scale(0.97); }
+.verify-btn:disabled { opacity:0.4; cursor:not-allowed; }
 
-.status-msg {
-    margin-top: 16px;
-    font-size: 13px;
-    font-weight: 600;
-    display: none;
-    padding: 14px;
-    border-radius: 14px;
-    text-align: center;
-    justify-content: center;
-}
-.status-msg.show { display: flex; align-items: center; gap: 8px; }
-.status-msg.error { background: #fff1f2; color: #e11d48; }
-.status-msg.success { background: #f0fdf4; color: #16a34a; }
+.status-msg { margin-top:14px; font-family:var(--font-display); font-size:11px; font-weight:800; display:none; padding:12px 16px; border-radius:10px; text-align:center; justify-content:center; align-items:center; gap:8px; letter-spacing:1.5px; }
+.status-msg.show { display:flex; }
+.status-msg.error { background:rgba(255,56,96,0.08); color:var(--red); border:1px solid rgba(255,56,96,0.2); }
+.status-msg.success { background:rgba(0,255,136,0.07); color:var(--green); border:1px solid rgba(0,255,136,0.2); }
 
-.claim-section {
-    display: none;
-    margin-top: 20px;
-    padding-top: 20px;
-    border-top: 1px solid #f0f0f0;
-}
-.claim-section.show { display: block; animation: slideUp 0.4s ease forwards; }
+.claim-section { display:none; margin-top:20px; padding-top:20px; border-top:1px solid var(--border); }
+.claim-section.show { display:block; animation:fadeUp 0.4s ease both; }
 
 .claim-preview {
-    background: #f9f9f9;
-    border-radius: 20px;
-    padding: 20px;
-    margin-bottom: 16px;
-    text-align: center;
+  background:var(--bg3); border:1px solid var(--border); border-radius:14px;
+  padding:20px; margin-bottom:14px; text-align:center;
 }
-.cp-label { font-size: 10px; font-weight: 800; color: rgba(0,0,0,0.3); text-transform: uppercase; margin-bottom: 4px; }
-.cp-title { font-size: 18px; font-weight: 900; color: #0a0a0a; }
+.cp-label { font-family:var(--font-display); font-size:9px; font-weight:800; color:var(--text3); text-transform:uppercase; letter-spacing:3px; margin-bottom:6px; }
+.cp-title { font-family:var(--font-mono); font-size:18px; font-weight:700; color:var(--cyan); letter-spacing:3px; text-shadow:0 0 10px rgba(0,240,255,0.4); }
 
 .claim-btn {
-    width: 100%;
-    padding: 18px;
-    background: #16a34a;
-    color: #fff;
-    border: none;
-    border-radius: 18px;
-    font-size: 14px;
-    font-weight: 900;
-    text-transform: uppercase;
-    cursor: pointer;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 8px;
+  width:100%; padding:16px; background:linear-gradient(135deg,var(--green),#00cc6a);
+  color:#000; border:none; border-radius:14px;
+  font-family:var(--font-display); font-size:13px; font-weight:900;
+  letter-spacing:3px; text-transform:uppercase; cursor:pointer; transition:var(--spring);
+  box-shadow:0 0 20px rgba(0,255,136,0.25); display:flex; align-items:center; justify-content:center; gap:8px;
 }
+.claim-btn:active { transform:scale(0.97); }
 
-@keyframes slideUp {
-    from { opacity: 0; transform: translateY(10px); }
-    to { opacity: 1; transform: translateY(0); }
+/* SUCCESS MODAL */
+.t-modal-box .suc-icon {
+  width:72px; height:72px; border-radius:50%;
+  background:rgba(0,255,136,0.1); border:2px solid rgba(0,255,136,0.3);
+  display:flex; align-items:center; justify-content:center; margin:0 auto 20px;
+  box-shadow:0 0 24px rgba(0,255,136,0.2);
 }
-
-.t-fade { opacity: 0; transform: translateY(15px); transition: 0.6s cubic-bezier(0.2, 1, 0.3, 1); }
-.t-fade.visible { opacity: 1; transform: translateY(0); }
-
-.t-modal-box { border-radius: 32px!important; padding: 40px 24px!important; }
 </style>
 </head>
 <body>
-
 <div id="header"></div>
 
-<div class="t-viewport-center">
-    <div class="t-container">
-        <div class="redeem-hero t-fade">
-            <div class="hero-svg-wrap">
-                <svg class="hero-svg" viewBox="0 0 24 24"><path d="M20 6h-2.18c.11-.31.18-.65.18-1a2.5 2.5 0 0 0-5-0c0 .35.07.69.18 1H11a2.5 2.5 0 0 0-5-0c0 .35.07.69.18 1H4c-1.11 0-1.99.89-1.99 2L2 19c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V8c0-1.11-.89-2-2-2m-5-3.5a1.5 1.5 0 0 1 0 3c-.41 0-.75-.33-.75-.75V4.11c0-.34.23-.61.75-.61m-6 3a1.5 1.5 0 0 1 0-3c.52 0 .75.27.75.61v.64c0 .42-.34.75-.75.75M9 19H4v-2h5v2m0-5H4v-2h5v2m11 5h-9v-7h9v7m0-9h-9v-2h9v2z"/></svg>
-            </div>
-            <h2>Redeem Reward</h2>
-            <p>Enter your code to unlock content</p>
-        </div>
-
-        <div class="redeem-card t-fade">
-            <div class="code-input-wrap">
-                <input class="code-input" id="redeemCodeInput" placeholder="••••••" maxlength="32" oninput="this.value=this.value.toUpperCase();clearMsg()">
-                <button class="verify-btn" id="verifyBtn" onclick="verifyCode()">Verify Code</button>
-            </div>
-            
-            <div class="status-msg" id="statusMsg"></div>
-
-            <div class="claim-section" id="claimSection">
-                <div class="claim-preview">
-                    <div class="cp-label">Coupon Found</div>
-                    <div class="cp-title" id="rewardTitle">—</div>
-                    <div id="rewardSub" style="display:none"></div>
-                </div>
-                <button class="claim-btn" id="claimBtn" onclick="claimReward()">
-                    Claim This Reward
-                </button>
-            </div>
-        </div>
+<div class="redeem-page">
+  <div class="redeem-inner">
+    <div class="redeem-hero t-fade">
+      <div class="hero-icon-wrap">
+        <svg viewBox="0 0 24 24"><path d="M20 6h-2.18c.11-.31.18-.65.18-1a2.5 2.5 0 00-5 0c0 .35.07.69.18 1H11a2.5 2.5 0 00-5 0c0 .35.07.69.18 1H4c-1.11 0-2 .89-2 2v11c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V8c0-1.11-.89-2-2-2z"/></svg>
+      </div>
+      <h2>Redeem Reward</h2>
+      <p>Enter your code to unlock exclusive content</p>
     </div>
+
+    <div class="redeem-card t-fade">
+      <input class="code-input" id="redeemCodeInput" placeholder="ENTER CODE" maxlength="32" oninput="this.value=this.value.toUpperCase();clearMsg()" autocomplete="off" spellcheck="false">
+      <button class="verify-btn" id="verifyBtn" onclick="verifyCode()">VERIFY CODE</button>
+      <div class="status-msg" id="statusMsg"></div>
+      <div class="claim-section" id="claimSection">
+        <div class="claim-preview">
+          <div class="cp-label">Reward Found</div>
+          <div class="cp-title" id="rewardTitle">—</div>
+        </div>
+        <button class="claim-btn" id="claimBtn" onclick="claimReward()">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2L4.5 20.29l.71.71L12 18l6.79 3 .71-.71L12 2z"/></svg>
+          Claim Reward
+        </button>
+      </div>
+    </div>
+  </div>
 </div>
 
 <div class="t-modal" id="rewardModal">
   <div class="t-modal-box">
-    <div style="background:#f0fdf4; width:80px; height:80px; border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto 20px;">
-        <svg style="width:40px; height:40px; fill:#16a34a" viewBox="0 0 24 24"><path d="M12 2L4.5 20.29l.71.71L12 18l6.79 3 .71-.71L12 2z"/></svg>
+    <div class="suc-icon">
+      <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
     </div>
-    <h3 style="font-size:24px; margin-bottom:10px;">Success!</h3>
-    <p style="margin-bottom:32px; color:rgba(0,0,0,0.5); font-size:15px; line-height:1.6;">Your reward has been successfully added to your account.</p>
-    <a id="rewardLink" target="_blank" style="display:block; padding:18px; background:#0a0a0a; color:#fff; text-decoration:none; border-radius:18px; font-size:14px; font-weight:900; text-transform:uppercase;">Access Content</a>
-    <button style="margin-top:20px; background:none; border:none; color:rgba(0,0,0,0.3); font-weight:700; cursor:pointer;" onclick="closeModal()">Close</button>
+    <h3>Claimed!</h3>
+    <p style="margin-bottom:28px;color:var(--text2);font-size:14px;font-weight:500;line-height:1.6">Your reward has been added to your account.</p>
+    <a id="rewardLink" target="_blank" style="display:block;padding:15px;background:linear-gradient(135deg,var(--cyan),var(--cyan2));color:#000;text-decoration:none;border-radius:12px;font-family:var(--font-display);font-size:11px;font-weight:800;letter-spacing:3px;text-transform:uppercase;text-align:center">Access Content</a>
+    <button style="margin-top:16px;background:none;border:none;color:var(--text3);font-family:var(--font-display);font-size:11px;font-weight:700;cursor:pointer;letter-spacing:1px" onclick="document.getElementById('rewardModal').classList.remove('active')">CLOSE</button>
   </div>
 </div>
 
@@ -230,137 +131,90 @@ body {
 
 <script>
 document.getElementById('shared').textContent = SHARED_CSS;
-firebase.initializeApp(firebaseConfig);
-const auth = firebase.auth();
-const db = firebase.firestore();
-
 document.getElementById('header').innerHTML = headerHTML('REDEEM');
 document.getElementById('footer').innerHTML = footerHTML();
 
-const initSidebar = () => {
-    const overlay = document.getElementById('overlay');
-    const sidebar = document.getElementById('sidebar');
-    window.toggleSidebar = () => {
-        sidebar.classList.toggle('active');
-        overlay.classList.toggle('active');
-    };
-    if(overlay) overlay.addEventListener('click', toggleSidebar);
-};
-initSidebar();
+// init
+const overlay=document.getElementById('overlay'),sidebar=document.getElementById('sidebar');
+window.toggleSidebar=()=>{sidebar.classList.toggle('active');overlay.classList.toggle('active');document.body.style.overflow=sidebar.classList.contains('active')?'hidden':'';};
+if(overlay)overlay.addEventListener('click',toggleSidebar);
 
-let USER = null, CURRENT_COUPON = null;
+let app; try { app = firebase.app(); } catch(e) { firebase.initializeApp(firebaseConfig); }
+const auth=firebase.auth(), db=firebase.firestore();
+let USER=null, CURRENT_COUPON=null;
 
 auth.onAuthStateChanged(u => {
-    USER = u;
-    if (!u) auth.signInAnonymously();
-    if (u && document.getElementById('cartBadge')) {
-        db.collection('users').doc(u.uid).collection('cart').onSnapshot(snap => {
-            document.getElementById('cartBadge').textContent = snap.size;
-            document.getElementById('cartBadge').style.display = snap.size > 0 ? 'flex' : 'none';
-        });
-    }
+  USER=u;
+  if(!u) auth.signInAnonymously().catch(()=>{});
+  if(u) {
+    const cb=document.getElementById('cartBadge');
+    if(cb) db.collection('users').doc(u.uid).collection('cart').onSnapshot(s=>{cb.textContent=s.size;cb.style.display=s.size>0?'flex':'none;'},()=>{});
+  }
 });
 
-const observer = new IntersectionObserver((entries) => {
-    entries.forEach(entry => { if (entry.isIntersecting) entry.target.classList.add('visible'); });
-}, { threshold: 0.1 });
-document.querySelectorAll('.t-fade').forEach(el => observer.observe(el));
+document.querySelectorAll('.t-fade').forEach(el =>
+  new IntersectionObserver(([e])=>{if(e.isIntersecting)el.classList.add('visible');},{threshold:0.1}).observe(el));
 
 function clearMsg() {
-    const msg = document.getElementById('statusMsg');
-    msg.className = 'status-msg';
-    msg.innerHTML = '';
-    document.getElementById('claimSection').classList.remove('show');
+  document.getElementById('statusMsg').className='status-msg';
+  document.getElementById('statusMsg').innerHTML='';
+  document.getElementById('claimSection').classList.remove('show');
 }
-
-function showMsg(text, type) {
-    const msg = document.getElementById('statusMsg');
-    msg.innerHTML = `<span>${text}</span>`;
-    msg.className = 'status-msg show ' + type;
+function showMsg(text,type) {
+  const m=document.getElementById('statusMsg');
+  m.innerHTML=`<span>${text}</span>`;
+  m.className='status-msg show '+type;
 }
 
 async function verifyCode() {
-    const code = document.getElementById('redeemCodeInput').value.trim().toUpperCase();
-    if (!code) { showMsg('Please enter a code', 'error'); return; }
-
-    const btn = document.getElementById('verifyBtn');
-    btn.disabled = true; btn.textContent = 'Verifying...';
-
-    try {
-        const q = await db.collection('coupons').doc(code).get();
-        if (!q.exists) {
-            showMsg('Invalid or inactive code', 'error');
-        } else {
-            const data = q.data();
-            if (data.validUntil && data.validUntil.toDate() < new Date()) {
-                showMsg('This coupon has expired', 'error');
-            } else if (data.usedCount >= data.maxUses) {
-                showMsg('Usage limit reached', 'error');
-            } else if (USER && data.usedBy && data.usedBy.includes(USER.uid)) {
-                showMsg('Already claimed by you', 'error');
-            } else {
-                CURRENT_COUPON = { id: q.id, ...data };
-                document.getElementById('rewardTitle').textContent = data.code;
-                document.getElementById('claimSection').classList.add('show');
-                showMsg('Code verified!', 'success');
-            }
-        }
-    } catch(e) { showMsg('Error checking code', 'error'); }
-    btn.disabled = false; btn.textContent = 'Verify Code';
+  const code=document.getElementById('redeemCodeInput').value.trim().toUpperCase();
+  if(!code){showMsg('Please enter a code','error');return;}
+  const btn=document.getElementById('verifyBtn');
+  btn.disabled=true; btn.textContent='VERIFYING...';
+  try {
+    const q=await db.collection('coupons').doc(code).get();
+    if(!q.exists) { showMsg('Invalid or inactive code','error'); }
+    else {
+      const data=q.data();
+      if(data.validUntil&&data.validUntil.toDate()<new Date()){showMsg('This code has expired','error');}
+      else if(data.usedCount>=(data.maxUses||9999)){showMsg('Usage limit reached','error');}
+      else if(USER&&data.usedBy&&data.usedBy.includes(USER.uid)){showMsg('Already claimed by you','error');}
+      else {
+        CURRENT_COUPON={id:q.id,...data};
+        document.getElementById('rewardTitle').textContent=data.code||(data.discount+'% OFF');
+        document.getElementById('claimSection').classList.add('show');
+        showMsg('✓ Code verified!','success');
+      }
+    }
+  } catch(e){showMsg('Error checking code','error');}
+  btn.disabled=false; btn.textContent='VERIFY CODE';
 }
 
 async function claimReward() {
-    if (!USER || USER.isAnonymous) {
-        showMsg('Please sign in first', 'error');
-        setTimeout(() => location.href = 'login.html', 1500);
-        return;
-    }
-    const btn = document.getElementById('claimBtn');
-    btn.disabled = true; btn.textContent = 'Claiming...';
-    try {
-        const batch = db.batch();
-        batch.update(db.collection('coupons').doc(CURRENT_COUPON.id), {
-            usedCount: firebase.firestore.FieldValue.increment(1),
-            usedBy: firebase.firestore.FieldValue.arrayUnion(USER.uid)
-        });
-        batch.set(db.collection('users').doc(USER.uid), {
-            redeems: firebase.firestore.FieldValue.arrayUnion({
-                code: CURRENT_COUPON.code,
-                date: new Date().toISOString()
-            })
-        }, { merge: true });
-        await batch.commit();
-        document.getElementById('rewardLink').href = CURRENT_COUPON.link || '#';
-        document.getElementById('rewardModal').classList.add('active');
-        document.getElementById('claimSection').classList.remove('show');
-    } catch(e) { alert('Claim failed'); }
-    btn.disabled = false; btn.textContent = 'Claim This Reward';
+  if(!USER||USER.isAnonymous){showMsg('Please sign in first','error');setTimeout(()=>location.href='login.html',1200);return;}
+  const btn=document.getElementById('claimBtn');
+  btn.disabled=true; btn.innerHTML='<span>Claiming...</span>';
+  try {
+    const batch=db.batch();
+    batch.update(db.collection('coupons').doc(CURRENT_COUPON.id),{usedCount:firebase.firestore.FieldValue.increment(1),usedBy:firebase.firestore.FieldValue.arrayUnion(USER.uid)});
+    batch.set(db.collection('users').doc(USER.uid),{redeems:firebase.firestore.FieldValue.arrayUnion({code:CURRENT_COUPON.code||CURRENT_COUPON.id,date:new Date().toISOString()})},{merge:true});
+    await batch.commit();
+    document.getElementById('rewardLink').href=CURRENT_COUPON.link||'index.html';
+    document.getElementById('rewardModal').classList.add('active');
+    document.getElementById('claimSection').classList.remove('show');
+    clearMsg();
+    document.getElementById('redeemCodeInput').value='';
+  } catch(e){showMsg('Claim failed. Try again.','error');}
+  btn.disabled=false; btn.innerHTML='<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2L4.5 20.29l.71.71L12 18l6.79 3 .71-.71L12 2z"/></svg> Claim Reward';
 }
 
-function closeModal() { document.getElementById('rewardModal').classList.remove('active'); }
+// close modal backdrop
+document.getElementById('rewardModal').addEventListener('click',e=>{if(e.target===document.getElementById('rewardModal'))document.getElementById('rewardModal').classList.remove('active');});
 
-/**
- * AUTO-VERIFY LOGIC
- * Reads URL params and waits for Firebase initialization
- */
-window.addEventListener('load', () => {
-    const params = new URLSearchParams(window.location.search);
-    const codeFromUrl = params.get('code');
-
-    if (codeFromUrl) {
-        const input = document.getElementById('redeemCodeInput');
-        input.value = codeFromUrl.toUpperCase();
-        
-        // Polling function to ensure Firebase 'db' is ready
-        const startAutoVerify = (attempts) => {
-            if (typeof db !== 'undefined' && db !== null) {
-                verifyCode();
-            } else if (attempts > 0) {
-                setTimeout(() => startAutoVerify(attempts - 1), 500);
-            }
-        };
-        startAutoVerify(10); // Check every 0.5s for 5 seconds total
-    }
+// auto-verify from URL
+window.addEventListener('load',()=>{
+  const code=new URLSearchParams(location.search).get('code');
+  if(code){document.getElementById('redeemCodeInput').value=code.toUpperCase();setTimeout(verifyCode,600);}
 });
 </script>
 </body>

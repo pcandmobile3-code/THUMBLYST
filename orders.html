@@ -7,74 +7,39 @@
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
-<script src="https://cdn.emailjs.com/dist/email.min.js"></script>
 <script src="config.js"></script>
 <style id="shared"></style>
 <style>
 .order-card {
-  background: var(--bg);
-  border-radius: var(--radius);
-  box-shadow: var(--shadow);
-  overflow: hidden;
-  margin-bottom: 14px;
-  cursor: pointer;
-  transition: var(--transition);
+  background:var(--bg2); border-radius:var(--radius);
+  border:1px solid var(--border); overflow:hidden;
+  margin-bottom:14px; cursor:pointer; transition:var(--transition);
 }
-.order-card:active { transform: scale(0.98); }
-.order-card img {
-  width: 100%;
-  max-height: 180px;
-  object-fit: contain;
-  background: var(--bg-secondary);
+.order-card:active { transform:scale(0.98); }
+.order-card:hover { border-color:var(--border2); box-shadow:0 4px 24px rgba(0,0,0,0.4); }
+.order-thumb {
+  width:100%; max-height:160px; object-fit:cover;
+  background:var(--bg3); display:block;
 }
-.order-info {
-  padding: 12px 16px;
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
+.order-info { padding:14px 16px; display:flex; flex-direction:column; gap:6px; }
+.order-info h4 {
+  font-family:var(--font-display); font-size:14px; font-weight:800;
+  color:var(--text); letter-spacing:0.5px;
 }
-.order-info h4 { font-size: 15px; font-weight: 700; }
-.order-info p { font-size: 14px; }
-.order-info small { font-size: 12px; color: var(--text-secondary); }
-.back-header {
-  height: 60px; display: flex; align-items: center; gap: 12px;
-  padding: 0 16px; border-bottom: 1px solid var(--border); background: var(--bg);
-  position: sticky; top: 0; z-index: 100;
+.order-price { font-family:var(--font-mono); font-size:14px; color:var(--cyan); }
+.order-meta { font-size:11px; color:var(--text3); font-weight:500; }
+.order-footer { display:flex; align-items:center; justify-content:space-between; margin-top:4px; }
+.sign-in-prompt {
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  padding:60px 20px; text-align:center; gap:16px;
 }
-.back-header h2 { font-size: 18px; font-weight: 700; flex: 1; }
-.back-btn { width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; border: none; background: none; color: var(--text); }
-</style>
-<style>
-body{background:#fff!important;color:#0a0a0a!important;}
-.t-header{background:rgba(255,255,255,0.95)!important;border-bottom-color:rgba(0,0,0,0.07)!important;}
-.t-logo{color:#0a0a0a!important;}.t-header-btn{color:#0a0a0a!important;}
-.t-sidebar{background:#fff!important;border-right-color:rgba(0,0,0,0.07)!important;}
-.t-sidebar-header{border-bottom-color:rgba(0,0,0,0.06)!important;color:#0a0a0a!important;}
-.t-sidebar-nav a{color:rgba(0,0,0,0.65)!important;border-bottom-color:rgba(0,0,0,0.05)!important;}
-.t-overlay{background:rgba(0,0,0,0.45)!important;}
-.t-container{background:#fff!important;padding-bottom:80px!important;}
-.t-card{background:#fff!important;border-color:rgba(0,0,0,0.07)!important;}
-.t-input{background:#f8f8f8!important;border-color:rgba(0,0,0,0.1)!important;color:#0a0a0a!important;}
-.t-input::placeholder{color:rgba(0,0,0,0.3)!important;}
-.t-btn-primary{background:#0a0a0a!important;color:#fff!important;font-weight:900!important;}
-.t-btn-outline{border-color:rgba(0,0,0,0.15)!important;color:#0a0a0a!important;background:transparent!important;}
-.t-section-title{color:#0a0a0a!important;font-size:10px!important;letter-spacing:3px!important;font-weight:900!important;text-transform:uppercase!important;}
-.t-footer{background:#0a0a0a!important;border-top-color:rgba(0,0,0,0.1)!important;color:rgba(255,255,255,0.4)!important;}
-.t-footer a{color:rgba(255,255,255,0.4)!important;}
-.t-spinner{border-color:rgba(0,0,0,0.08)!important;border-top-color:#0a0a0a!important;}
-.t-empty{color:rgba(0,0,0,0.3)!important;}
-.back-header{background:rgba(255,255,255,0.95)!important;border-bottom-color:rgba(0,0,0,0.07)!important;}
-.back-header h2,.back-header h3{color:#0a0a0a!important;}
-.back-btn{color:#0a0a0a!important;}
-.t-modal-box{background:#fff!important;border:1px solid rgba(0,0,0,0.08)!important;box-shadow:0 8px 40px rgba(0,0,0,0.12)!important;}
-.t-modal-box h3,.t-modal-box h2{color:#0a0a0a!important;}
-h1,h2,h3{color:#0a0a0a;}
+.sign-in-prompt h3 { font-family:var(--font-display); font-size:18px; font-weight:800; color:var(--text); letter-spacing:2px; }
+.sign-in-prompt p { font-size:13px; color:var(--text2); }
 </style>
 </head>
 <body>
-
 <div class="back-header">
-  <button class="back-btn" onclick="location.href='index.html'"><span id="backIcon"></span></button>
+  <button class="back-btn" onclick="location.href='index.html'" id="backBtn" aria-label="Home"></button>
   <h2>My Orders</h2>
 </div>
 
@@ -84,55 +49,71 @@ h1,h2,h3{color:#0a0a0a;}
 
 <script>
 document.getElementById('shared').textContent = SHARED_CSS;
-document.getElementById('backIcon').innerHTML = ICONS.back;
+document.getElementById('backBtn').innerHTML = ICONS.home;
 
-firebase.initializeApp(firebaseConfig);
-const auth = firebase.auth();
-const db = firebase.firestore();
-emailjs.init('A-xkSV1KqUWuGftf');
-
+let app;
+try { app = firebase.app(); } catch(e) { firebase.initializeApp(firebaseConfig); }
+const auth = firebase.auth(), db = firebase.firestore();
 const ordersBox = document.getElementById('ordersBox');
 
-function getStatusClass(s) {
+function statusClass(s) {
   if (s === 'Creating') return 't-status-creating';
   if (s === 'Processing') return 't-status-processing';
   if (s === 'Processed') return 't-status-processed';
   return 't-status-verifying';
 }
 
-auth.onAuthStateChanged(async user => {
-  if (!user) return auth.signInWithPopup(new firebase.auth.GoogleAuthProvider());
-  await loadOrders(user.uid, user.email);
+auth.onAuthStateChanged(user => {
+  if (!user || user.isAnonymous) {
+    ordersBox.innerHTML = `<div class="sign-in-prompt">
+      <div style="width:64px;height:64px;border-radius:50%;background:rgba(0,240,255,0.08);border:1px solid var(--border2);display:flex;align-items:center;justify-content:center">${ICONS.user}</div>
+      <h3>Sign In to View Orders</h3>
+      <p>Track your orders and get updates on your GFX</p>
+      <button class="t-btn t-btn-primary" style="max-width:220px" onclick="location.href='login.html'">SIGN IN</button>
+    </div>`;
+    return;
+  }
+  loadOrders(user.uid);
 });
 
-async function loadOrders(uid, email) {
-  const snap = await db.collection('users').doc(uid).collection('orders').orderBy('createdAt', 'desc').get();
+async function loadOrders(uid) {
+  try {
+    const snap = await db.collection('users').doc(uid).collection('orders').get();
+    const docs = snap.docs.sort((a,b) => (b.data().createdAt?.toMillis?.()??0) - (a.data().createdAt?.toMillis?.()??0));
 
-  if (snap.empty) { ordersBox.innerHTML = '<div class="t-empty">No orders yet</div>'; return; }
-  ordersBox.innerHTML = '';
+    if (!docs.length) { ordersBox.innerHTML = '<div class="t-empty">No orders yet.<br>Start shopping!</div>'; return; }
+    ordersBox.innerHTML = '';
 
-  for (const orderDoc of snap.docs) {
-    const o = orderDoc.data();
-    const oid = orderDoc.id;
-    const itemsSnap = await orderDoc.ref.collection('items').get();
+    for (const orderDoc of docs) {
+      const o = orderDoc.data();
+      const oid = orderDoc.id;
+      try {
+        const itemsSnap = await orderDoc.ref.collection('items').get();
+        itemsSnap.forEach(itemDoc => {
+          const item = itemDoc.data();
+          const price = Number(item.Price||item.price||0);
+          const img = item.Thumbnail||item.imageUrl||item.image||'';
+          const status = o.status||'Verifying';
+          ordersBox.innerHTML += `
+            <div class="order-card t-fade" onclick="location.href='od.html?oid=${oid}&item=${itemDoc.id}'" role="button" tabindex="0" aria-label="${item.Title||'Order'}">
+              ${img ? `<img class="order-thumb" src="${img}" alt="${(item.Title||'').replace(/"/g,'&quot;')}" loading="lazy" onerror="this.style.display='none'">` : ''}
+              <div class="order-info">
+                <h4>${item.Title||item.title||'Item'}</h4>
+                <span class="order-price">&#8377;${price}</span>
+                ${item.CustomText ? `<span class="order-meta">Text: ${item.CustomText}</span>` : ''}
+                <div class="order-footer">
+                  <span class="t-status ${statusClass(status)}">${status}</span>
+                  <span style="font-size:10px;color:var(--text3);font-family:var(--font-display);letter-spacing:1px">VIEW DETAILS →</span>
+                </div>
+              </div>
+            </div>`;
+        });
+      } catch(_) {}
+    }
 
-    itemsSnap.forEach(itemDoc => {
-      const item = itemDoc.data();
-      const price = Number(item.Price || item.price || 0);
-      const img = item.Thumbnail || item.imageUrl || item.image || '';
-
-      ordersBox.innerHTML += `
-        <div class="order-card" onclick="location.href='od.html?oid=${oid}&item=${itemDoc.id}'">
-          <img src="${img}">
-          <div class="order-info">
-            <h4>${item.Title || item.title || 'Item'}</h4>
-            <p>₹${price}</p>
-            ${item.CustomText ? `<small>Text: ${item.CustomText}</small>` : ''}
-            <span class="t-status ${getStatusClass(o.status)}">${o.status || 'Payment Verification'}</span>
-          </div>
-        </div>`;
-    });
-  }
+    document.querySelectorAll('.t-fade').forEach(el =>
+      new IntersectionObserver(([e])=>{if(e.isIntersecting)el.classList.add('visible');},{threshold:0.05}).observe(el));
+  } catch(e) { ordersBox.innerHTML = '<div class="t-empty">Could not load orders</div>'; }
 }
 </script>
 </body>
